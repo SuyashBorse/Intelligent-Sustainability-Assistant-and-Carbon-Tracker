@@ -1,23 +1,67 @@
-# AI-Powered Personal Carbon Footprint Tracker
+# AI-Powered Personal Carbon Footprint Tracker & Sustainability Assistant
 
-Project documentation package for building a responsive carbon-footprint tracking web application using HTML5, CSS3, TypeScript, Supabase, and Google Gemini.
+A modern, responsive carbon footprint tracking web application with interactive emission calculators, Chart.js analytics, real-time gamification, and Gemini AI coaching.
 
-## Documentation
-- `PRD.md` — Product Requirements Document
-- `ARCHITECTURE.md` — System architecture and technical design
-- `DATABASE_SCHEMA.md` — PostgreSQL/Supabase schema and RLS requirements
-- `AI_GEMINI_SPEC.md` — Gemini integration and structured-output specification
-- `UI_UX_SPEC.md` — UI/UX and component hierarchy
-- `EMISSION_CALCULATION_SPEC.md` — Carbon calculation engine and emission-factor design
-- `SECURITY_SPEC.md` — Authentication, RLS, secrets, and security requirements
-- `API_SPEC.md` — Frontend/backend/Edge Function interfaces
-- `GAMIFICATION_SPEC.md` — Goals, challenges, points, badges, and streaks
-- `TEST_PLAN.md` — Functional, security, responsive, and AI testing plan
-- `IMPLEMENTATION_PLAN.md` — Recommended phased implementation plan
-- `ANTIGRAVITY_MASTER_PROMPT.md` — Master build prompt for Antigravity
+---
 
-## Stack
-HTML5, CSS3, TypeScript, Supabase, PostgreSQL, Supabase Auth, Supabase Edge Functions, Google Gemini API, Chart.js.
+## 📁 Project Structure
 
-## Important
-Gemini secrets must never be exposed in frontend code. Use a Supabase Edge Function for Gemini calls.
+```text
+├── frontend/                     # Web Application Frontend
+│   ├── index.html                # Main application workspace & views
+│   ├── login.html                # Sign-in portal
+│   ├── register.html             # User registration portal
+│   ├── css/
+│   │   ├── main.css              # Design tokens, themes & layout shell
+│   │   ├── components.css        # Buttons, modals, cards, badges & forms
+│   │   └── pages.css             # Page-specific views & analytics styles
+│   └── js/
+│       ├── app.js                # UI orchestration & event controller
+│       ├── store.js              # Client state store & local persistence
+│       ├── calculator.js         # Carbon calculation engine
+│       ├── emissionFactors.js    # IPCC emission factor repository
+│       ├── charts.js             # Chart.js visualization engine
+│       ├── gamification.js       # Streaks, points & badge evaluation
+│       └── aiCoach.js            # Sustainability assistant & recommendations
+│
+├── documents/                    # Architectural Specifications & Documentation
+│   ├── PRD.md                    # Product Requirements Document
+│   ├── ARCHITECTURE.md           # System architecture and technical design
+│   ├── DATABASE_SCHEMA.md        # PostgreSQL/Supabase schema & RLS
+│   ├── AI_GEMINI_SPEC.md         # Gemini integration & prompt specifications
+│   ├── UI_UX_SPEC.md             # UI/UX design tokens & responsive specifications
+│   ├── EMISSION_CALCULATION_SPEC.md # GHG Protocol calculation formulas
+│   ├── SECURITY_SPEC.md          # Security, auth, and privacy requirements
+│   ├── API_SPEC.md               # API & Edge Function endpoint interfaces
+│   ├── GAMIFICATION_SPEC.md      # Points, badges, challenges & streaks
+│   ├── TEST_PLAN.md              # Automated & manual test scenarios
+│   ├── IMPLEMENTATION_PLAN.md    # Phased rollout and milestones
+│   └── ANTIGRAVITY_MASTER_PROMPT.md # Antigravity coding instructions
+│
+├── package.json                  # Node dependencies & Vite scripts
+└── README.md                     # Repository overview & setup guide
+```
+
+---
+
+## 🚀 Getting Started
+
+### 1. Install Dependencies
+```bash
+npm install
+```
+
+### 2. Start Local Development Server
+```bash
+npm run dev
+```
+Serves the `frontend/` directory at `http://localhost:3000/`.
+
+---
+
+## 🛠️ Tech Stack
+- **Frontend**: HTML5, CSS3 Variables, Vanilla ES Modules, Chart.js
+- **Development**: Vite (ESM Dev Server)
+- **Backend / DB (Target)**: Supabase, PostgreSQL, Edge Functions
+- **AI Integration**: Google Gemini API (Personalized decarbonization recommendations)
+

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — EcoTrack AI Carbon Tracker</title>
+  <meta name="description" content="Create your free EcoTrack AI personal carbon footprint account." />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <style>
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: radial-gradient(circle at top right, #ecfdf5 0%, #f8fafc 60%);
+    }
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      width: 100%;
+      max-width: 440px;
+      padding: 2.5rem;
+    }
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+    .oauth-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all var(--trans-fast);
+      box-shadow: var(--shadow-xs);
+    }
+    .oauth-btn:hover {
+      background: var(--surface-hover);
+      border-color: #cbd5e1;
+    }
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 1.5rem 0;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border);
+    }
+    .auth-divider span {
+      padding: 0 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">EcoTrack AI</div>
+          <div class="brand-subtitle">Sustainability Portal</div>
+        </div>
+      </div>
+
+      <h2 style="font-size: 1.45rem; margin-bottom: 0.35rem;">Start your eco journey</h2>
+      <p style="margin-bottom: 1.5rem; font-size: 0.9rem;">Join thousands reducing personal carbon emissions with real-time analytics and AI coaching.</p>
+
+      <!-- Google OAuth Button -->
+      <button class="oauth-btn" id="btnGoogleSignUp">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.4 8.9 5 12 5z"/>
+          <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
+          <path fill="#FBBC05" d="M5.3 14.8c-.2-.7-.4-1.5-.4-2.3 0-.8.2-1.6.4-2.3L1.6 7.4C.6 9.4 0 11.6 0 14s.6 4.6 1.6 6.6l3.7-2.8z"/>
+          <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.4-6.7-5.3L1.6 15.8C3.5 19.6 7.4 23 12 23z"/>
+        </svg>
+        Sign up with Google
+      </button>
+
+      <div class="auth-divider">
+        <span>or sign up with email</span>
+      </div>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label class="form-label" for="regName">Full Name</label>
+          <input type="text" id="regName" class="form-input" placeholder="e.g. Suyash Borse" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Email address</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="you@example.com" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPassword">Password</label>
+          <input type="password" id="regPassword" class="form-input" placeholder="At least 8 characters" minlength="8" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1.25rem;">
+          Create Free Account
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.75rem; font-size: 0.88rem; color: var(--text-muted);">
+        Already have an account? <a href="login.html" style="font-weight: 600;">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function saveAndRedirect(name, email) {
+      try {
+        const userName = name || "Eco Advocate";
+        const userEmail = email || "user@example.com";
+
+        // Save active user profile
+        localStorage.setItem("ecotrack_current_user", JSON.stringify({
+          name: userName,
+          email: userEmail
+        }));
+
+        // Initialize 100% fresh profile state: 0 activities, 0 goals, 0 points, 0 streak
+        const freshState = {
+          user: {
+            id: "usr_" + Date.now(),
+            name: userName,
+            email: userEmail,
+            country: "India",
+            preferredUnit: "kg",
+            reductionTarget: 20,
+            points: 0,
+            streak: 0,
+            lastLoggedDate: null
+          },
+          activities: [],
+          goals: [],
+          challenges: [
+            { id: "ch_01", title: "Transit Pioneer", description: "Log at least 5 public transit or cycling trips this week.", category: "transportation", target: 5, progress: 0, unit: "trips", points: 50, difficulty: "easy", completed: false },
+            { id: "ch_02", title: "Plant Power Week", description: "Record 4 plant-based meals in the food category.", category: "food", target: 4, progress: 0, unit: "meals", points: 50, difficulty: "medium", completed: false },
+            { id: "ch_03", title: "Phantom Watt Hunter", description: "Log energy baseline under 10 kWh for 3 consecutive days.", category: "energy", target: 3, progress: 0, unit: "days", points: 60, difficulty: "hard", completed: false },
+            { id: "ch_04", title: "Mindful Consumer", description: "Keep shopping and apparel purchases at 0 for 7 straight days.", category: "shopping", target: 7, progress: 0, unit: "days", points: 75, difficulty: "medium", completed: false }
+          ],
+          achievements: [
+            { id: "ach_01", name: "First Step", description: "Record your very first carbon activity log.", icon: "🌱", points: 25, unlocked: false, unlockedAt: null },
+            { id: "ach_02", name: "Green Traveler", description: "Log 5 public transit or zero-emission commute trips.", icon: "🚲", points: 50, unlocked: false, unlockedAt: null },
+            { id: "ach_03", name: "7-Day Streak", description: "Maintain a continuous daily carbon logging streak for 7 days.", icon: "🔥", points: 75, unlocked: false, unlockedAt: null },
+            { id: "ach_04", name: "Energy Warden", description: "Reduce home electricity consumption by 20% compared to baseline.", icon: "⚡", points: 100, unlocked: false, unlockedAt: null },
+            { id: "ach_05", name: "Eco Champion", description: "Accumulate 500+ sustainability points through active habits.", icon: "👑", points: 150, unlocked: false, unlockedAt: null }
+          ]
+        };
+
+        // Write to both keys to be 100% synchronized
+        localStorage.setItem("carbon_tracker_state_v1", JSON.stringify(freshState));
+        localStorage.setItem("ecotrack_state_v1", JSON.stringify(freshState));
+      } catch (e) {
+        console.error("Could not save registration state", e);
+      }
+      window.location.href = "index.html";
+    }
+
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const name = document.getElementById("regName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      saveAndRedirect(name, email);
+    });
+
+    document.getElementById("btnGoogleSignUp").addEventListener("click", function() {
+      const name = prompt("Enter your name for your Google EcoTrack profile:", "Suyash Borse");
+      if (name) {
+        const email = name.toLowerCase().replace(/\s+/g, ".") + "@gmail.com";
+        saveAndRedirect(name, email);
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+</body>
+</html>
