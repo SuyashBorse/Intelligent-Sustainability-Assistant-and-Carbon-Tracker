@@ -4,857 +4,341 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoTrack AI — Intelligent Sustainability Assistant & Carbon Tracker</title>
-  <meta name="description" content="Personal carbon footprint tracker with real-time emission calculations, analytics, goals, gamification, and Gemini AI coaching." />
-  <meta name="theme-color" content="#059669" />
+  <meta name="description" content="Calculate real-time personal carbon footprint, adopt customized Gemini AI reduction goals, and build sustainable habits with interactive gamification." />
+
+  <!-- Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet" />
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/pages.css" />
-
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/landing.css" />
 </head>
-<body>
-  <div class="app-container">
-    <!-- ====================================================================
-         Sidebar Navigation
-         ==================================================================== -->
-    <aside class="app-sidebar" aria-label="Sidebar Navigation">
-      <div class="sidebar-header">
-        <div class="sidebar-brand-group">
-          <div class="brand-logo" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
-              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
-            </svg>
-          </div>
-          <div class="sidebar-brand-text">
-            <div class="brand-title">EcoTrack AI</div>
-            <div class="brand-subtitle">Carbon Assistant</div>
-          </div>
+<body class="landing-body">
+
+  <!-- ======================================================================
+       Sticky Navigation Bar
+       ====================================================================== -->
+  <header class="landing-header">
+    <div class="landing-nav-container">
+      <a href="index.html" class="landing-brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+          </svg>
         </div>
-        <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar" aria-label="Collapse sidebar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
-        </button>
-      </div>
+        <div>
+          <div class="brand-title">EcoTrack AI</div>
+          <div class="brand-subtitle">Sustainability Cockpit</div>
+        </div>
+      </a>
 
-      <nav class="sidebar-nav">
-        <div class="nav-section-title">Main Menu</div>
-        <button class="nav-item active" data-view="dashboard" data-title="Dashboard" title="Dashboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-          <span class="nav-label">Dashboard</span>
-        </button>
-
-        <button class="nav-item" data-view="activities" data-title="Activities History" title="Activities History">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          <span class="nav-label">Activities History</span>
-        </button>
-
-        <button class="nav-item" data-view="analytics" data-title="Analytics & Trends" title="Analytics & Trends">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-          <span class="nav-label">Analytics & Trends</span>
-        </button>
-
-        <div class="nav-section-title" style="margin-top: 0.5rem;">Behavior & Goals</div>
-        <button class="nav-item" data-view="goals" data-title="Goals & Challenges" title="Goals & Challenges">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-          <span class="nav-label">Goals & Challenges</span>
-          <span class="nav-badge">4</span>
-        </button>
-
-        <button class="nav-item" data-view="ai-coach" data-title="AI Coach (Gemini)" title="AI Coach (Gemini)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
-          <span class="nav-label">AI Coach (Gemini)</span>
-          <span class="badge nav-badge" style="margin-left: auto; background: rgba(16, 185, 129, 0.15); color: var(--primary); font-size: 0.65rem;">AI</span>
-        </button>
-
-        <div class="nav-section-title" style="margin-top: 0.5rem;">Account</div>
-        <button class="nav-item" data-view="profile" data-title="Profile & Preferences" title="Profile & Preferences">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span class="nav-label">Profile & Preferences</span>
-        </button>
+      <nav class="landing-nav-links" aria-label="Main Navigation">
+        <a href="#features">Features</a>
+        <a href="#calculator">Live Calculator</a>
+        <a href="#how-it-works">How It Works</a>
       </nav>
 
-      <div class="sidebar-footer">
-        <div class="user-quick-profile">
-          <div class="user-avatar" id="sidebarUserAvatar">AR</div>
-          <div class="user-info">
-            <div class="user-name" id="sidebarUserName">Alex Rivera</div>
-            <div class="user-role" id="sidebarUserRole">Eco Advocate • Lvl 3</div>
-          </div>
-          <button class="logout-icon-btn btn-logout" id="footerLogoutBtn" title="Log Out" aria-label="Log Out">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          </button>
-        </div>
+      <div class="landing-nav-actions">
+        <!-- Prominent Log In Button that triggers the Login Window Modal -->
+        <button type="button" class="btn btn-secondary btn-sm btn-open-login-modal" id="navLoginBtn" title="Open Login Window">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span>Log In</span>
+        </button>
+
+        <a href="register.html" class="btn btn-primary btn-sm" id="navGetStartedBtn">
+          <span>Get Started Free</span>
+        </a>
       </div>
-    </aside>
+    </div>
+  </header>
 
-    <!-- Smooth Backdrop for Mobile/Tablet overlay -->
-    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+  <!-- ======================================================================
+       Hero Section
+       ====================================================================== -->
+  <section class="landing-hero">
+    <div class="hero-pill-badge">
+      <span>🌱</span>
+      <span>AI-Powered Climate Action & GHG Intelligence • Version 1.0</span>
+    </div>
 
-    <!-- ====================================================================
-         Main Workspace Layout
-         ==================================================================== -->
-    <div class="app-main">
-      <!-- Topbar Header -->
-      <header class="app-topbar">
-        <div class="topbar-left">
-          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation sidebar" title="Toggle Sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></svg>
-          </button>
-          <div class="page-breadcrumb">
-            <span>EcoTrack</span>
-            <span>/</span>
-            <span class="current" id="breadcrumbCurrent">Dashboard</span>
+    <h1 class="hero-title">
+      Track, Reduce & Neutralize Your Personal <span class="gradient-text">Carbon Footprint</span>.
+    </h1>
+
+    <p class="hero-subtitle">
+      Automated GHG tracking across transportation, energy, diet, and lifestyle with verified IPCC emission factors. Receive personalized decarbonization coaching powered by Google Gemini.
+    </p>
+
+    <div class="hero-cta-group">
+      <a href="register.html" class="btn btn-primary btn-lg" style="padding: 0.9rem 2rem; font-size: 1rem; border-radius: var(--radius-md);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        <span>Get Started Free</span>
+      </a>
+
+      <!-- Log In Button opening modal -->
+      <button type="button" class="btn btn-secondary btn-lg btn-open-login-modal" id="heroLoginBtn" style="padding: 0.9rem 1.8rem; font-size: 1rem; border-radius: var(--radius-md);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <span>Log In to Account</span>
+      </button>
+    </div>
+
+    <!-- Trust Bar -->
+    <div class="hero-trust-bar">
+      <div class="hero-trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>5 GHG Emission Categories</span>
+      </div>
+      <div class="hero-trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Verified IPCC AR6 Factors</span>
+      </div>
+      <div class="hero-trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Gemini 2.0 AI Coach</span>
+      </div>
+      <div class="hero-trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>100% Free & Open Source</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       1. Features Grid (First)
+       ====================================================================== -->
+  <section class="section-wrapper" id="features">
+    <div class="section-header">
+      <span class="section-tag section-tag-features">✨ Platform Features</span>
+      <h2>Everything you need to master your carbon balance</h2>
+      <p>Built upon GHG Protocol methodology, IPCC emission coefficient libraries, and personalized generative AI coaching.</p>
+    </div>
+
+    <div class="features-grid">
+      <!-- Feature 1 -->
+      <div class="feature-card reveal-up reveal-delay-1">
+        <div class="feature-icon-wrapper" style="background: #eff6ff; color: #3b82f6;">🚗</div>
+        <h3>Multi-Category GHG Calculator</h3>
+        <p>Log commute trips, electricity usage, plant-based or meat meals, water usage, and consumer shopping with factor snapshotting.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card reveal-up reveal-delay-2" id="ai-coach">
+        <div class="feature-icon-wrapper" style="background: #fdf4ff; color: #a855f7;">🤖</div>
+        <h3>Gemini AI Sustainability Coach</h3>
+        <p>Evaluates your recent footprint drivers and generates customized, high-leverage reduction recommendations with 1-click goal adoption.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card reveal-up reveal-delay-3">
+        <div class="feature-icon-wrapper" style="background: #fef3c7; color: #d97706;">🔥</div>
+        <h3>Habit Streaks & Gamification</h3>
+        <p>Stay motivated with daily logging streaks, active weekly climate challenges, level progression, and unlockable achievement badges.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feature-card reveal-up reveal-delay-4">
+        <div class="feature-icon-wrapper" style="background: #ecfdf5; color: #10b981;">📊</div>
+        <h3>Visual Analytics & Trends</h3>
+        <p>Interactive spline charts, category doughnut breakdowns with zero-emission placeholders, and monthly progress tracking.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       2. Live Calculator Section (Then Live Calculator)
+       ====================================================================== -->
+  <section class="section-wrapper" id="calculator">
+    <div class="section-header" style="margin-bottom: 2.25rem;">
+      <span class="section-tag section-tag-calculator">⚡ Interactive Live Estimator</span>
+      <h2>Instant Carbon Footprint Calculator</h2>
+      <p>Estimate your daily commute emissions and compare how different transit options impact your footprint in real time.</p>
+    </div>
+
+    <div class="hero-preview-section" style="margin-top: 0;">
+      <div class="preview-grid">
+        <div>
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="heroModeSelect" style="font-size: 0.88rem;">Select Commute Transit Mode</label>
+            <select class="form-select" id="heroModeSelect">
+              <option value="car_petrol" selected>Car (Petrol / Gasoline) — 0.21 kg CO₂e/km</option>
+              <option value="car_electric">Electric Vehicle (Mixed Grid) — 0.05 kg CO₂e/km</option>
+              <option value="public_bus">Public Diesel Bus — 0.089 kg CO₂e/km</option>
+              <option value="metro_train">Electric Metro / Rail — 0.035 kg CO₂e/km</option>
+              <option value="cycling">Bicycle / Walking — 0.00 kg CO₂e/km</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <label class="form-label" for="heroDistanceSlider" style="margin-bottom: 0; font-size: 0.88rem;">Daily Travel Distance</label>
+              <span id="heroDistanceVal" style="font-weight: 700; color: var(--primary); font-size: 0.95rem;">30 km / day</span>
+            </div>
+            <input type="range" id="heroDistanceSlider" min="5" max="120" step="5" value="30" style="width: 100%; accent-color: var(--primary); cursor: pointer;" />
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <span>5 km</span>
+              <span>30 km</span>
+              <span>60 km</span>
+              <span>120 km</span>
+            </div>
           </div>
         </div>
 
-        <div class="topbar-right">
-          <div class="streak-pill" title="Current Daily Logging Streak">
-            <span>🔥</span>
-            <span class="label">Streak:</span>
-            <span id="topbarStreakVal">6 Days</span>
-          </div>
-
-          <div class="points-pill" title="Total Eco-Points Earned">
-            <span>⭐</span>
-            <span class="label">Points:</span>
-            <span id="topbarPointsVal">385 pts</span>
-          </div>
-
-          <button class="btn btn-primary btn-sm btn-open-log-modal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span>Log Activity</span>
-          </button>
-        </div>
-      </header>
-
-      <!-- App Views Workspace -->
-      <main class="app-content">
-        <!-- ================================================================
-             VIEW: Dashboard
-             ================================================================ -->
-        <section id="view-dashboard" class="page-view active">
-          <!-- Demo Notice Banner (Shown only when using demo user) -->
-          <div class="demo-account-banner" id="demoBanner" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 0.75rem 1.25rem; border-radius: var(--radius-md); align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.65rem;">
-              <span style="font-size: 1.25rem;">🌱</span>
-              <div>
-                <strong style="color: var(--text-main); font-size: 0.9rem;">Exploring Demo Account (Alex Rivera):</strong>
-                <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 0.25rem;">Ready to track your own real footprint?</span>
-              </div>
-            </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button type="button" class="btn btn-primary btn-sm" id="btnBannerCreateProfile">
-                + Create My Profile
-              </button>
-              <button type="button" class="btn btn-ghost btn-sm" id="btnDismissDemoBanner" style="color: var(--text-muted);">
-                Dismiss
-              </button>
-            </div>
-          </div>
-
-          <!-- Hero Banner -->
-          <div class="dashboard-banner">
-            <div class="banner-text">
-              <h2 id="dashboardGreeting">Welcome back, Alex 🌱</h2>
-              <p id="dashboardBannerDesc">Your calculated footprint is <strong>14% lower</strong> than your 30-day baseline. Keep up your public transit and plant-based habits to reach your monthly goal!</p>
-            </div>
-            <div class="banner-cta">
-              <button class="btn btn-secondary btn-sm btn-open-log-modal">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Log Emission
-              </button>
-            </div>
-          </div>
-
-          <!-- KPI Metric Cards Grid -->
-          <div class="kpi-grid">
-            <!-- Today -->
-            <div class="kpi-card kpi-transport">
-              <div class="kpi-top">
-                <span class="kpi-label">Today's Emissions</span>
-                <div class="kpi-icon-wrap">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                </div>
-              </div>
-              <div class="kpi-value">
-                <span id="kpiTodayVal">8.5</span>
-                <span class="kpi-unit">kg CO₂e</span>
-              </div>
-              <div class="kpi-footer">
-                <span class="trend-badge trend-down">↓ 1.2 kg</span>
-                <span style="color: var(--text-muted);">vs yesterday</span>
-              </div>
-            </div>
-
-            <!-- This Week -->
-            <div class="kpi-card kpi-energy">
-              <div class="kpi-top">
-                <span class="kpi-label">Last 7 Days</span>
-                <div class="kpi-icon-wrap">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                </div>
-              </div>
-              <div class="kpi-value">
-                <span id="kpiWeekVal">41.8</span>
-                <span class="kpi-unit">kg CO₂e</span>
-              </div>
-              <div class="kpi-footer">
-                <span class="trend-badge trend-down">↓ 8%</span>
-                <span style="color: var(--text-muted);">from prior week</span>
-              </div>
-            </div>
-
-            <!-- This Month -->
-            <div class="kpi-card kpi-food">
-              <div class="kpi-top">
-                <span class="kpi-label">Last 30 Days</span>
-                <div class="kpi-icon-wrap">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-                </div>
-              </div>
-              <div class="kpi-value">
-                <span id="kpiMonthVal">185.4</span>
-                <span class="kpi-unit">kg CO₂e</span>
-              </div>
-              <div class="kpi-footer">
-                <span class="trend-badge trend-neutral">Target: &lt;210 kg</span>
-              </div>
-            </div>
-
-            <!-- Sustainability Score Gauge -->
-            <div class="kpi-card kpi-score">
-              <div class="kpi-top">
-                <span class="kpi-label">Sustainability Score</span>
-                <div class="kpi-icon-wrap" style="color: var(--primary);">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                </div>
-              </div>
-              <div class="score-card-content">
-                <div class="score-circle-wrap">
-                  <svg class="score-circle-svg" viewBox="0 0 100 100">
-                    <defs>
-                      <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#10b981" />
-                        <stop offset="100%" stop-color="#06b6d4" />
-                      </linearGradient>
-                    </defs>
-                    <circle class="score-bg-ring" cx="50" cy="50" r="40" />
-                    <circle id="scoreRingProgress" class="score-progress-ring" cx="50" cy="50" r="40" />
-                  </svg>
-                  <div class="score-number">
-                    <span id="scoreVal">84</span>
-                    <small>Top 15%</small>
-                  </div>
-                </div>
-                <div style="font-size: 0.82rem; color: var(--text-secondary);">
-                  <strong style="color: var(--primary-dark); display: block; margin-bottom: 2px;">Great Performance!</strong>
-                  Ahead of regional average by 18%.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Charts Section: Emission Trend & Category Breakdown -->
-          <div class="charts-grid">
-            <div class="card">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-                    Carbon Footprint Trend
-                  </div>
-                  <div class="card-subtitle">Daily estimated CO₂e emission patterns</div>
-                </div>
-                <div class="chart-filters">
-                  <button class="chart-filter-btn active" data-filter="7d">7D</button>
-                  <button class="chart-filter-btn" data-filter="30d">30D</button>
-                  <button class="chart-filter-btn" data-filter="year">1Y</button>
-                </div>
-              </div>
-              <div class="chart-container">
-                <canvas id="trendChartCanvas"></canvas>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10h-10z"/></svg>
-                    Category Breakdown
-                  </div>
-                  <div class="card-subtitle">Emissions by activity source</div>
-                </div>
-              </div>
-              <div class="chart-container">
-                <canvas id="categoryChartCanvas"></canvas>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom Grid: Top Contributors & Active Goals -->
-          <div class="dashboard-lower-grid">
-            <!-- Top Contributors -->
-            <div class="card">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cat-energy)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    Highest Emission Drivers
-                  </div>
-                  <div class="card-subtitle">Major contributors to your personal footprint</div>
-                </div>
-              </div>
-              <div class="contributor-list" id="topContributorsList">
-                <!-- Dynamically injected -->
-              </div>
-            </div>
-
-            <!-- Active Goals -->
-            <div class="card">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                    Current Reduction Goals
-                  </div>
-                  <div class="card-subtitle">Active targets set for this month</div>
-                </div>
-              </div>
-              <div class="goal-progress-list" id="activeGoalsList">
-                <!-- Dynamically injected -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Recent Logs Table -->
-          <div class="card" style="margin-top: 2rem;">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Recent Activity Logs</div>
-                <div class="card-subtitle">Latest recorded entries and calculated CO₂e snapshots</div>
-              </div>
-              <button class="btn btn-secondary btn-sm btn-open-log-modal">+ Log Activity</button>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Activity Type</th>
-                    <th>Quantity</th>
-                    <th>Estimated CO₂e</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="dashboardRecentTableBody">
-                  <!-- Dynamically populated -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- ================================================================
-             VIEW: Activities History
-             ================================================================ -->
-        <section id="view-activities" class="page-view">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h2>Activity Log History</h2>
-                <p>Complete historical log of your tracked emissions with calculation factor snapshots.</p>
-              </div>
-              <button class="btn btn-primary btn-sm btn-open-log-modal">+ Log New Activity</button>
-            </div>
-
-            <div class="table-responsive" style="margin-top: 1.5rem;">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Activity Type</th>
-                    <th>Quantity</th>
-                    <th>Estimated CO₂e</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="activitiesFullTableBody">
-                  <!-- Dynamically populated -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- ================================================================
-             VIEW: Analytics & Trends
-             ================================================================ -->
-        <section id="view-analytics" class="page-view">
-          <div class="analytics-header-controls">
-            <div>
-              <h2>Analytics & Comparative Breakdown</h2>
-              <p>Explore your carbon trends across categories and identify key reduction opportunities.</p>
-            </div>
-          </div>
-
-          <div class="analytics-summary-cards">
-            <div class="analytics-stat-box">
-              <div class="title">Daily Average</div>
-              <div class="number">6.18 <small style="font-size: 0.8rem; font-weight: 500;">kg</small></div>
-            </div>
-            <div class="analytics-stat-box">
-              <div class="title">Primary Category</div>
-              <div class="number" style="color: var(--cat-transport);">Transport</div>
-            </div>
-            <div class="analytics-stat-box">
-              <div class="title">Green Trip Share</div>
-              <div class="number" style="color: var(--primary);">48%</div>
-            </div>
-            <div class="analytics-stat-box">
-              <div class="title">Projected Annual</div>
-              <div class="number">2.2 <small style="font-size: 0.8rem; font-weight: 500;">tonnes</small></div>
-            </div>
-          </div>
-
-          <div class="card" style="margin-bottom: 2rem;">
-            <div class="card-header">
-              <div class="card-title">Category Comparison (kg CO₂e)</div>
-            </div>
-            <div class="chart-container" style="height: 360px;">
-              <canvas id="analyticsBarCanvas"></canvas>
-            </div>
-          </div>
-        </section>
-
-        <!-- ================================================================
-             VIEW: Goals & Gamification
-             ================================================================ -->
-        <section id="view-goals" class="page-view">
-          <!-- Gamification Hero -->
-          <div class="gamification-hero">
-            <div>
-              <div class="badge" style="background: rgba(255,255,255,0.15); color: white; margin-bottom: 0.75rem;">Gamified Sustainability</div>
-              <h2 style="color: white; font-size: 1.8rem;">Level 3 Eco Advocate</h2>
-              <p style="color: #c7d2fe; margin-top: 0.4rem;">Complete community challenges, maintain your daily logging streak, and unlock exclusive eco-badges.</p>
-            </div>
-
-            <div class="streak-card-display">
-              <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #fed7aa; font-weight: 700;">Current Streak</div>
-              <div class="streak-count-hero" id="heroStreakCount">6 🔥</div>
-              <div style="font-size: 0.8rem; color: #fed7aa; margin-top: 0.25rem;">+30 pts bonus at 7 days!</div>
-            </div>
-          </div>
-
-          <!-- Personal Reduction Goals Section -->
-          <div style="margin-bottom: 2.5rem;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
-              <div>
-                <h3>Personal Carbon Reduction Goals</h3>
-                <p>Track targets across statuses and log incremental progress toward your decarbonization milestones.</p>
-              </div>
-              <div class="goal-filter-pills" id="goalFilterGroup">
-                <button class="goal-filter-btn active" data-goal-filter="all">All (<span id="countGoalAll">3</span>)</button>
-                <button class="goal-filter-btn" data-goal-filter="in_progress">In Progress (<span id="countGoalInProgress">1</span>)</button>
-                <button class="goal-filter-btn" data-goal-filter="not_started">Not Started (<span id="countGoalNotStarted">1</span>)</button>
-                <button class="goal-filter-btn" data-goal-filter="completed">Completed (<span id="countGoalCompleted">1</span>)</button>
-              </div>
-            </div>
-
-            <div class="goal-progress-list" id="viewGoalsContainer">
-              <!-- Dynamically rendered via app.js -->
-            </div>
-          </div>
-
-          <!-- Active Challenges Grid -->
-          <div style="margin-bottom: 2.5rem;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
-              <div>
-                <h3>Weekly Sustainability Challenges</h3>
-                <p>Take actionable steps to lower your emissions and earn eco-points.</p>
-              </div>
-            </div>
-
-            <div class="challenges-grid" id="challengesGrid">
-              <!-- Dynamically rendered -->
-            </div>
-          </div>
-
-          <!-- Achievement Badges -->
+        <div class="preview-result-card">
           <div>
-            <div style="margin-bottom: 1.25rem;">
-              <h3>Achievement Badges</h3>
-              <p>Milestones reached on your decarbonization journey.</p>
-            </div>
-
-            <div class="badges-grid" id="badgesGrid">
-              <!-- Dynamically rendered -->
-            </div>
+            <span style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary-dark);">Daily Estimated Emission</span>
+            <div class="preview-co2-number"><span id="heroCalculatedCo2">6.3</span> <span style="font-size: 1.25rem; font-weight: 600; color: var(--text-muted);">kg CO₂e</span></div>
+            <p id="heroTreeEquiv" style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem;">
+              189 kg CO₂e / month (needs ~105 mature trees to absorb)
+            </p>
           </div>
-        </section>
+          <button type="button" class="btn btn-primary btn-sm btn-open-login-modal" style="width: 100%; font-weight: 600; padding: 0.75rem 1rem;">
+            Start Tracking Your Footprint →
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- ================================================================
-             VIEW: AI Sustainability Coach (Gemini)
-             ================================================================ -->
-        <section id="view-ai-coach" class="page-view">
-          <div class="ai-coach-wrapper">
-            <div class="ai-header-card">
-              <span class="ai-header-badge">Google Gemini 1.5 Pro Engine</span>
-              <h2 style="color: white;">Personalized Sustainability Coach</h2>
-              <p style="color: #a7f3d0; margin-top: 0.5rem;">
-                Gemini evaluates your recent 30-day activity logs, calculates high-leverage emission drivers, and provides practical, structured recommendations tailored to your daily routine.
-              </p>
+  <!-- ======================================================================
+       3. How It Works Steps
+       ====================================================================== -->
+  <section class="section-wrapper" id="how-it-works" style="background: #fafafa; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: 100%;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div class="section-header">
+        <span class="section-tag section-tag-works">🚀 Effortless Flow</span>
+        <h2>How EcoTrack AI Works</h2>
+        <p>A simple 3-step loop to turn personal climate awareness into measurable CO₂e reduction.</p>
+      </div>
 
-              <div class="ai-prompt-chips">
-                <button class="prompt-chip-btn" data-topic="commute">🚗 Optimize Commute</button>
-                <button class="prompt-chip-btn" data-topic="food">🥗 Plant-Based Diet Wins</button>
-                <button class="prompt-chip-btn" data-topic="energy">⚡ Cut Home Electricity</button>
-                <button class="prompt-chip-btn" id="generateAiBtn">🔄 Refresh Full Analysis</button>
-              </div>
-            </div>
+      <div class="steps-grid">
+        <div class="step-card reveal-up reveal-delay-1">
+          <div class="step-number">1</div>
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">Log Daily Activities</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted);">Spend 15 seconds entering your commute, home electricity meter, or meals. Dynamic factor formulas calculate impact instantly.</p>
+        </div>
 
-            <!-- AI Summary Box -->
-            <div class="card" id="aiSummaryBox" style="background: #f8fafc; border-left: 4px solid var(--primary);">
-              <!-- Rendered via aiCoach.js -->
-            </div>
+        <div class="step-card reveal-up reveal-delay-2">
+          <div class="step-number">2</div>
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">Inspect Visual Analytics</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted);">View multi-period emission curves, category doughnut breakdowns, and monitor your 0–100 Sustainability Health Score.</p>
+        </div>
 
-            <!-- Recommendation Cards Deck -->
-            <div class="recommendations-deck" id="aiRecommendationsDeck">
-              <!-- Rendered via aiCoach.js -->
-            </div>
-          </div>
-        </section>
+        <div class="step-card reveal-up reveal-delay-3">
+          <div class="step-number">3</div>
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">Adopt Goals & Level Up</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted);">Adopt AI Coach recommendations directly into your roadmap, track incremental progress milestones, and earn eco-points.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- ================================================================
-             VIEW: Profile & Settings
-             ================================================================ -->
-        <section id="view-profile" class="page-view">
-          <div class="profile-grid">
-            <div class="profile-card-user">
-              <div class="profile-avatar-large" id="profileCardAvatar">AR</div>
-              <h3 id="profileCardName">Alex Rivera</h3>
-              <p id="profileCardEmail">alex.rivera@example.com</p>
-              <div style="margin-top: 1rem;">
-                <span class="badge badge-food" id="profileCardRole">Eco Advocate • Lvl 3</span>
-              </div>
-
-              <div style="margin-top: 1.5rem; width: 100%; display: flex; flex-direction: column; gap: 0.65rem;">
-                <button type="button" class="btn btn-secondary btn-sm btn-block" id="btnOpenNewProfileModal">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                  Create / Switch Profile
-                </button>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <div>
-                  <h3>Profile Details & Targets</h3>
-                  <div class="card-subtitle">Personalize your identity, grid region, and carbon reduction goals</div>
-                </div>
-              </div>
-
-              <form id="profileForm">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label" for="profileNameInput">Full Name <span class="req">*</span></label>
-                    <input type="text" id="profileNameInput" class="form-input" placeholder="e.g. Suyash Borse" required />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="profileEmailInput">Email Address <span class="req">*</span></label>
-                    <input type="email" id="profileEmailInput" class="form-input" placeholder="e.g. suyash@example.com" required />
-                  </div>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label" for="profileCountrySelect">Country / Grid Region</label>
-                    <select class="form-select" id="profileCountrySelect">
-                      <option value="India">India (CEA Central Grid)</option>
-                      <option value="United States">United States (Regional Mixed Grid)</option>
-                      <option value="United Kingdom">United Kingdom (Clean Grid)</option>
-                      <option value="Germany">Germany (European ENTSO-E)</option>
-                      <option value="Australia">Australia (NEM Grid)</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="profileUnitSelect">Preferred Mass Unit</label>
-                    <select class="form-select" id="profileUnitSelect">
-                      <option value="kg">Kilograms (kg CO₂e)</option>
-                      <option value="lbs">Pounds (lbs CO₂e)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label" for="profileTargetSelect">Monthly CO₂e Reduction Target</label>
-                  <select class="form-select" id="profileTargetSelect">
-                    <option value="10">10% reduction (Gentle start)</option>
-                    <option value="20" selected>20% reduction (Recommended)</option>
-                    <option value="30">30% aggressive reduction</option>
-                  </select>
-                </div>
-
-                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
-                  <button type="submit" class="btn btn-primary" id="btnSaveProfile">Save Profile & Preferences</button>
-                </div>
-
-                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-                  <div>
-                    <h4 style="font-size: 0.95rem; margin-bottom: 0.2rem; color: var(--text-main);">Data & Session Management</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-muted);">Start fresh with empty logs or sign out of your account.</p>
-                  </div>
-                  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-secondary btn-sm" id="btnClearActivitiesBtn" style="color: var(--text-secondary);">
-                      Clear Activity Logs
-                    </button>
-                    <button type="button" class="btn btn-danger btn-sm btn-logout" id="profileLogoutBtn">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                      Sign Out
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </section>
-      </main>
+  <!-- ======================================================================
+       Call To Action Banner
+       ====================================================================== -->
+  <div class="landing-cta-banner reveal-up">
+    <h2>Start Your Decarbonization Journey Today</h2>
+    <p>Join thousands taking measurable climate action with instant GHG analytics and AI coaching.</p>
+    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+      <a href="register.html" class="btn btn-secondary btn-lg" style="background: #ffffff; color: var(--primary-dark); font-weight: 700; border: none; padding: 0.9rem 2.25rem;">
+        Create Free Account
+      </a>
+      <button type="button" class="btn btn-ghost btn-lg btn-open-login-modal" id="ctaLoginBtn" style="color: #ffffff; border: 1.5px solid rgba(255, 255, 255, 0.4); padding: 0.9rem 2rem;">
+        Sign In to Existing Account
+      </button>
     </div>
   </div>
 
   <!-- ======================================================================
-       MODAL: Log Activity & Real-Time Emission Calculator
+       Footer
        ====================================================================== -->
-  <div class="modal-overlay" id="logActivityModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 id="modalTitle" style="display: flex; align-items: center; gap: 0.5rem;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          Log Environmental Activity
-        </h3>
-        <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close modal">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-copy">
+        <strong>EcoTrack AI</strong> — Intelligent Sustainability Assistant & Carbon Tracker. Built with IPCC AR6 emission factors and Google Gemini.
       </div>
-
-      <form id="logActivityForm">
-        <div class="modal-body">
-          <!-- Step 1: Category Picker -->
-          <div class="form-group">
-            <label class="form-label">Select Activity Category <span class="req">*</span></label>
-            <div class="category-pills">
-              <button type="button" class="cat-pill-btn selected" data-category="transportation">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="16" height="16" x="4" y="4" rx="2"/><path d="M9 18h6"/><circle cx="8" cy="14" r="2"/><circle cx="16" cy="14" r="2"/></svg>
-                Transport
-              </button>
-              <button type="button" class="cat-pill-btn" data-category="energy">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                Energy
-              </button>
-              <button type="button" class="cat-pill-btn" data-category="food">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                Food
-              </button>
-              <button type="button" class="cat-pill-btn" data-category="water">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-                Water
-              </button>
-              <button type="button" class="cat-pill-btn" data-category="shopping">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                Shopping
-              </button>
-            </div>
-          </div>
-
-          <!-- Step 2: Activity Type Selector -->
-          <div class="form-group">
-            <label class="form-label" for="activitySelect">Specific Activity Type <span class="req">*</span></label>
-            <select class="form-select" id="activitySelect" required>
-              <!-- Populated dynamically via app.js -->
-            </select>
-          </div>
-
-          <!-- Step 3: Quantity & Date -->
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="quantityInput">
-                Quantity (<span id="unitLabel">km</span>) <span class="req">*</span>
-              </label>
-              <input type="number" step="any" min="0.01" class="form-input" id="quantityInput" placeholder="e.g. 25" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="activityDateInput">Activity Date <span class="req">*</span></label>
-              <input type="date" class="form-input" id="activityDateInput" required />
-            </div>
-          </div>
-
-          <!-- Optional Notes -->
-          <div class="form-group">
-            <label class="form-label" for="activityNotesInput">Notes / Context (Optional)</label>
-            <input type="text" class="form-input" id="activityNotesInput" placeholder="e.g. Highway trip to work, carpooled with Sam" />
-          </div>
-
-          <!-- LIVE Real-Time Calculation Preview -->
-          <div class="calc-preview-box">
-            <div class="calc-preview-info">
-              <div class="calc-preview-label">Live Estimated Impact</div>
-              <div class="calc-preview-value" id="calcPreviewVal">0.00 kg CO₂e</div>
-              <div class="calc-preview-formula" id="calcPreviewFormula">Formula: quantity × factor</div>
-            </div>
-            <div class="calc-preview-factor-tag" id="calcFactorTag">
-              <strong>Source:</strong> IPCC / DEFRA<br>
-              <strong>Region:</strong> Global Average
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-ghost" onclick="document.getElementById('logActivityModal').classList.remove('open')">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btnSubmitActivity">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Save Activity Snapshot
-          </button>
-        </div>
-      </form>
+      <div class="footer-links">
+        <a href="#" class="btn-open-login-modal">Log In</a>
+        <a href="register.html">Sign Up</a>
+        <a href="https://github.com/SuyashBorse/Intelligent-Sustainability-Assistant-and-Carbon-Tracker" target="_blank" rel="noreferrer">GitHub Repository</a>
+      </div>
     </div>
-  </div>
+  </footer>
 
   <!-- ======================================================================
-       MODAL: Update Goal Progress (Incremental progress logging)
+       INTERACTIVE LOGIN WINDOW MODAL
+       Triggered whenever any Login button is clicked on the homepage
        ====================================================================== -->
-  <div class="modal-overlay" id="goalProgressModal" role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
-    <div class="modal-box" style="max-width: 520px;">
-      <div class="modal-header">
-        <h3 id="goalModalTitle" style="display: flex; align-items: center; gap: 0.5rem;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-          Log Goal Progress
-        </h3>
-        <button class="modal-close-btn" id="goalModalCloseBtn" aria-label="Close modal">
+  <div class="modal-overlay" id="homepageLoginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+    <div class="login-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div class="brand-logo" style="width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+          </div>
+          <div>
+            <h3 id="loginModalTitle" style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0;">Sign In to EcoTrack</h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Access your carbon tracker and analytics</span>
+          </div>
+        </div>
+
+        <button class="modal-close-btn" id="loginModalCloseBtn" aria-label="Close login window" style="margin: -0.5rem -0.5rem 0 0;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
-      <form id="goalProgressForm">
-        <div class="modal-body">
-          <input type="hidden" id="goalModalTargetId" />
-          <div style="margin-bottom: 1.25rem;">
-            <span class="badge" id="goalModalStatusBadge" style="margin-bottom: 0.4rem;">In Progress</span>
-            <h4 id="goalModalGoalTitle" style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 0.25rem;">Goal Title</h4>
-            <p id="goalModalGoalDesc" style="font-size: 0.85rem; color: var(--text-muted);">Goal description</p>
-          </div>
+      <!-- Google OAuth Option -->
+      <button type="button" class="oauth-btn" id="btnModalGoogleLogin" style="margin-bottom: 1rem;">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.4 8.9 5 12 5z"/>
+          <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
+          <path fill="#FBBC05" d="M5.3 14.8c-.2-.7-.4-1.5-.4-2.3 0-.8.2-1.6.4-2.3L1.6 7.4C.6 9.4 0 11.6 0 14s.6 4.6 1.6 6.6l3.7-2.8z"/>
+          <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.4-6.7-5.3L1.6 15.8C3.5 19.6 7.4 23 12 23z"/>
+        </svg>
+        Continue with Google
+      </button>
 
-          <div style="background: var(--surface-alt); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
-              <span style="color: var(--text-muted);">Current Progress:</span>
-              <strong id="goalModalCurrentPct" style="color: var(--primary-dark);">65%</strong>
-            </div>
-            <div class="progress-track">
-              <div class="progress-bar-fill" id="goalModalPreviewBar" style="width: 65%;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); margin-top: 0.4rem;">
-              <span>Target: <strong id="goalModalTargetKg">25 kg</strong> CO₂e reduction</span>
-              <span id="goalModalProjectedPct" style="font-weight: 700; color: var(--primary);">New: 65%</span>
-            </div>
-          </div>
+      <div class="auth-divider" style="margin: 1.25rem 0;">
+        <span>or sign in with email</span>
+      </div>
 
-          <div class="form-group">
-            <label class="form-label" for="goalIncrementInput">Add Progress Percentage (% points) <span class="req">*</span></label>
-            <input type="number" min="1" max="100" class="form-input" id="goalIncrementInput" placeholder="Enter % to add (e.g. 15)" value="15" required />
-            <div class="progress-quick-chips">
-              <button type="button" class="chip-btn" data-inc="10">+10%</button>
-              <button type="button" class="chip-btn" data-inc="20">+20%</button>
-              <button type="button" class="chip-btn" data-inc="35">+35%</button>
-              <button type="button" class="chip-btn" id="btnFillToHundred" style="background: var(--primary-light); color: var(--primary-dark); border-color: var(--primary);">Reach 100%</button>
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" for="goalProgressNoteInput">Activity Note / Milestone (Optional)</label>
-            <input type="text" class="form-input" id="goalProgressNoteInput" placeholder="e.g. Took the train 4 times, avoided 12 kg CO₂e" />
-          </div>
+      <!-- Main Login Form -->
+      <form id="homepageLoginForm">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" for="modalLoginEmail" style="font-size: 0.85rem;">Email address</label>
+          <input type="email" id="modalLoginEmail" class="form-input" placeholder="you@example.com" required />
         </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-ghost" id="goalModalCancelBtn">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btnSubmitGoalProgress">
-            Save Progress
-          </button>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label" for="modalLoginPassword" style="margin-bottom: 0; font-size: 0.85rem;">Password</label>
+            <a href="#" style="font-size: 0.78rem; color: var(--primary);">Forgot password?</a>
+          </div>
+          <input type="password" id="modalLoginPassword" class="form-input" placeholder="Enter password" required />
         </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="border-radius: var(--radius-md); font-weight: 700;">
+          Sign In
+        </button>
       </form>
-    </div>
-  </div>
 
-  <!-- ======================================================================
-       MODAL: Create / Switch User Profile
-       ====================================================================== -->
-  <div class="modal-overlay" id="newProfileModal" role="dialog" aria-modal="true" aria-labelledby="newProfileTitle">
-    <div class="modal-box" style="max-width: 480px;">
-      <div class="modal-header">
-        <h3 id="newProfileTitle" style="display: flex; align-items: center; gap: 0.5rem;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-          Create Your Profile
-        </h3>
-        <button class="modal-close-btn" id="newProfileCloseBtn" aria-label="Close modal">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <!-- Quick Demo Access -->
+      <div style="margin-top: 1.25rem; text-align: center;">
+        <button type="button" id="btnModalDemoLogin" class="btn btn-ghost btn-sm" style="color: var(--text-muted); font-size: 0.82rem;">
+          ⚡ Quick Tour: Sign in as Demo User (Alex Rivera)
         </button>
       </div>
 
-      <form id="newProfileForm">
-        <div class="modal-body">
-          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-            Set up your personal identity to track your carbon footprint, set custom emission reduction targets, and personalize your experience.
-          </p>
-
-          <div class="form-group">
-            <label class="form-label" for="createUserName">Your Full Name <span class="req">*</span></label>
-            <input type="text" class="form-input" id="createUserName" placeholder="e.g. Suyash Borse" required />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="createUserEmail">Email Address <span class="req">*</span></label>
-            <input type="email" class="form-input" id="createUserEmail" placeholder="e.g. suyash@example.com" required />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="createUserCountry">Country / Region</label>
-            <select class="form-select" id="createUserCountry">
-              <option value="India" selected>India (CEA Central Grid)</option>
-              <option value="United States">United States (Regional Mixed Grid)</option>
-              <option value="United Kingdom">United Kingdom (Clean Grid)</option>
-              <option value="Germany">Germany (European ENTSO-E)</option>
-              <option value="Australia">Australia (NEM Grid)</option>
-            </select>
-          </div>
-
-          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-sm); padding: 0.85rem 1rem; font-size: 0.85rem; color: #166534; display: flex; align-items: flex-start; gap: 0.65rem; margin-top: 0.5rem;">
-            <span style="font-size: 1.1rem; line-height: 1;">✨</span>
-            <div>
-              <strong style="display: block; margin-bottom: 0.15rem; color: #14532d;">Complete Fresh Start</strong>
-              All sample activity logs, reduction goals, points, and streaks will start fresh at 0, ready for your personal tracking.
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-ghost" id="newProfileCancelBtn">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btnSubmitNewProfile">
-            Create Profile & Start
-          </button>
-        </div>
-      </form>
+      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1.25rem;">
+        Don't have an account yet? <a href="register.html" style="font-weight: 700; color: var(--primary); text-decoration: none;">Sign up for free</a>
+      </div>
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
-  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
-
-  <!-- Master TypeScript / ES Module Entrypoint -->
-  <script type="module" src="js/app.js"></script>
+  <!-- Landing Page Interactive Script -->
+  <script src="js/landing.js"></script>
 </body>
 </html>

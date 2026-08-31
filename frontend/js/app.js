@@ -1033,7 +1033,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => {
       showToast("Logging out...", "info");
       setTimeout(() => {
-        window.location.href = "login.html";
+        window.location.href = "index.html";
       }, 500);
     });
   });

@@ -75,7 +75,7 @@
 <body>
   <div class="auth-wrapper">
     <div class="auth-card">
-      <div class="auth-brand">
+      <a href="index.html" class="auth-brand" style="text-decoration: none; color: inherit;" title="Return to Homepage">
         <div class="brand-logo">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
@@ -86,7 +86,7 @@
           <div class="brand-title">EcoTrack AI</div>
           <div class="brand-subtitle">Sustainability Portal</div>
         </div>
-      </div>
+      </a>
 
       <h2 style="font-size: 1.45rem; margin-bottom: 0.35rem;">Welcome back</h2>
       <p style="margin-bottom: 1.5rem; font-size: 0.9rem;">Sign in to track emissions, view analytics, and get personalized AI reduction coaching.</p>
@@ -161,7 +161,7 @@
           localStorage.setItem("ecotrack_state_v1", JSON.stringify(state));
         }
       } catch (err) {}
-      window.location.href = 'index.html';
+      window.location.href = 'dashboard.html';
     }
 
     document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -182,7 +182,7 @@
         const email = name.toLowerCase().replace(/\s+/g, ".") + "@gmail.com";
         loginUser(name, email);
       } else {
-        window.location.href = "index.html";
+        window.location.href = "dashboard.html";
       }
     });
   </script>
