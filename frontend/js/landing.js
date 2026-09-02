@@ -220,7 +220,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateHeroCalculator() {
     if (!distanceSlider || !calculatedCo2Display) return;
 
-    const kmPerDay = parseFloat(distanceSlider.value) || 30;
+    const val = parseFloat(distanceSlider.value);
+    const kmPerDay = isNaN(val) ? 0 : val;
     const modeKey = modeSelect ? modeSelect.value : "car_petrol";
     const factor = (modeKey in EMISSION_FACTORS) ? EMISSION_FACTORS[modeKey] : 0.21;
 
@@ -234,12 +235,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const monthlyKg = Math.round(kmPerDay * 22 * factor);
     const treesNeeded = Math.max(1, Math.round(monthlyKg / 1.8));
 
-    // Update daily CO2 number with slight animation pulse
+    // Update daily CO2 number
     calculatedCo2Display.textContent = dailyKg;
 
     // Update tree & monthly statement
     if (treeEquivDisplay) {
-      if (modeKey === "cycling") {
+      if (modeKey === "cycling" || kmPerDay === 0) {
         treeEquivDisplay.textContent = `0 kg CO₂e / month — Zero-emission commute! 🎉`;
       } else {
         treeEquivDisplay.textContent = `${monthlyKg} kg CO₂e / month (needs ~${treesNeeded} mature trees to absorb)`;
