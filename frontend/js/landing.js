@@ -203,51 +203,59 @@ document.addEventListener("DOMContentLoaded", () => {
   // ------------------------------------------------------------------------
   // Live Commute Carbon Estimator Math
   // ------------------------------------------------------------------------
-  const commuteDistanceInput = document.getElementById("commuteDistance");
-  const distanceValueDisplay = document.getElementById("distanceValue");
-  const calcOutputCO2 = document.getElementById("calcOutputCO2");
-  const calcOutputTrees = document.getElementById("calcOutputTrees");
-  const modeButtons = document.querySelectorAll(".mode-btn");
+  const modeSelect = document.getElementById("heroModeSelect");
+  const distanceSlider = document.getElementById("heroDistanceSlider");
+  const distanceValDisplay = document.getElementById("heroDistanceVal");
+  const calculatedCo2Display = document.getElementById("heroCalculatedCo2");
+  const treeEquivDisplay = document.getElementById("heroTreeEquiv");
 
   const EMISSION_FACTORS = {
-    car: 0.192,
-    bus: 0.089,
-    train: 0.041,
-    ev: 0.053
+    car_petrol: 0.21,
+    car_electric: 0.05,
+    public_bus: 0.089,
+    metro_train: 0.035,
+    cycling: 0.00
   };
 
-  let selectedMode = "car";
+  function updateHeroCalculator() {
+    if (!distanceSlider || !calculatedCo2Display) return;
 
-  function recalculateEmissions() {
-    if (!commuteDistanceInput || !calcOutputCO2) return;
+    const kmPerDay = parseFloat(distanceSlider.value) || 30;
+    const modeKey = modeSelect ? modeSelect.value : "car_petrol";
+    const factor = (modeKey in EMISSION_FACTORS) ? EMISSION_FACTORS[modeKey] : 0.21;
 
-    const kmPerDay = parseFloat(commuteDistanceInput.value) || 25;
-    if (distanceValueDisplay) {
-      distanceValueDisplay.textContent = `${kmPerDay} km`;
+    // Update distance readout text
+    if (distanceValDisplay) {
+      distanceValDisplay.textContent = `${kmPerDay} km / day`;
     }
 
-    const factor = EMISSION_FACTORS[selectedMode] || EMISSION_FACTORS.car;
+    // Calculate daily and monthly emissions
+    const dailyKg = (kmPerDay * factor).toFixed(1);
     const monthlyKg = Math.round(kmPerDay * 22 * factor);
     const treesNeeded = Math.max(1, Math.round(monthlyKg / 1.8));
 
-    calcOutputCO2.textContent = `${monthlyKg} kg CO₂e / month`;
-    if (calcOutputTrees) {
-      calcOutputTrees.textContent = `needs ~${treesNeeded} mature trees to absorb`;
+    // Update daily CO2 number with slight animation pulse
+    calculatedCo2Display.textContent = dailyKg;
+
+    // Update tree & monthly statement
+    if (treeEquivDisplay) {
+      if (modeKey === "cycling") {
+        treeEquivDisplay.textContent = `0 kg CO₂e / month — Zero-emission commute! 🎉`;
+      } else {
+        treeEquivDisplay.textContent = `${monthlyKg} kg CO₂e / month (needs ~${treesNeeded} mature trees to absorb)`;
+      }
     }
   }
 
-  modeButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      modeButtons.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedMode = btn.dataset.mode || "car";
-      recalculateEmissions();
-    });
-  });
-
-  if (commuteDistanceInput) {
-    commuteDistanceInput.addEventListener("input", recalculateEmissions);
+  if (distanceSlider) {
+    distanceSlider.addEventListener("input", updateHeroCalculator);
+    distanceSlider.addEventListener("change", updateHeroCalculator);
   }
 
-  recalculateEmissions();
+  if (modeSelect) {
+    modeSelect.addEventListener("change", updateHeroCalculator);
+  }
+
+  // Initial calculation on load
+  updateHeroCalculator();
 });
