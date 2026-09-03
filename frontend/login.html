@@ -7,6 +7,17 @@
   <meta name="description" content="Sign in to your EcoTrack AI personal carbon footprint account." />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
+
+  <!-- Theme Initialization (Prevents FOUC) -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem("ecotrack_theme");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = savedTheme || (prefersDark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+
   <style>
     .auth-wrapper {
       min-height: 100vh;
@@ -14,7 +25,16 @@
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
-      background: radial-gradient(circle at top right, #ecfdf5 0%, #f8fafc 60%);
+      background: radial-gradient(circle at top right, #ecfdf5 0%, var(--bg-app) 60%);
+      position: relative;
+    }
+    [data-theme="dark"] .auth-wrapper {
+      background: radial-gradient(circle at top right, rgba(6, 78, 59, 0.25) 0%, var(--bg-app) 60%);
+    }
+    .auth-theme-toggle {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
     }
     .auth-card {
       background: var(--surface);
@@ -74,6 +94,12 @@
 </head>
 <body>
   <div class="auth-wrapper">
+    <div class="auth-theme-toggle">
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Dark / Light Mode" title="Toggle Theme">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
     <div class="auth-card">
       <a href="index.html" class="auth-brand" style="text-decoration: none; color: inherit;" title="Return to Homepage">
         <div class="brand-logo">
@@ -185,6 +211,41 @@
         window.location.href = "dashboard.html";
       }
     });
+
+    // Theme Toggle Handler
+    (function() {
+      const themeToggleBtn = document.getElementById("themeToggleBtn");
+      const sunIcon = themeToggleBtn?.querySelector(".sun-icon");
+      const moonIcon = themeToggleBtn?.querySelector(".moon-icon");
+
+      function syncThemeIcons(theme) {
+        if (!themeToggleBtn) return;
+        if (theme === "dark") {
+          if (sunIcon) sunIcon.style.display = "block";
+          if (moonIcon) moonIcon.style.display = "none";
+          themeToggleBtn.setAttribute("title", "Switch to Light Mode");
+          themeToggleBtn.setAttribute("aria-label", "Switch to Light Mode");
+        } else {
+          if (sunIcon) sunIcon.style.display = "none";
+          if (moonIcon) moonIcon.style.display = "block";
+          themeToggleBtn.setAttribute("title", "Switch to Dark Mode");
+          themeToggleBtn.setAttribute("aria-label", "Switch to Dark Mode");
+        }
+      }
+
+      const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+      syncThemeIcons(currentTheme);
+
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener("click", () => {
+          const active = document.documentElement.getAttribute("data-theme") || "light";
+          const next = active === "dark" ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", next);
+          localStorage.setItem("ecotrack_theme", next);
+          syncThemeIcons(next);
+        });
+      }
+    })();
   </script>
 </body>
 </html>

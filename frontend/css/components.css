@@ -665,3 +665,56 @@
     transform: translateY(0) scale(1);
   }
 }
+
+/* ==========================================================================
+   Dark Mode Component Refinements
+   ========================================================================== */
+[data-theme="dark"] .score-bg-ring {
+  stroke: #22324d;
+}
+
+[data-theme="dark"] .modal-box {
+  border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea {
+  background: var(--surface-alt);
+  border-color: var(--border);
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] .form-textarea:focus {
+  background: var(--surface);
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .chip-btn {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .chip-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: var(--surface);
+  color: var(--text-main);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background: var(--surface-hover);
+  border-color: #3b82f6;
+}
+
+[data-theme="dark"] .card:hover {
+  border-color: #334155;
+}
+

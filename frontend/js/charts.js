@@ -24,12 +24,26 @@ const COLORS = {
   primaryGradientEnd: "rgba(16, 185, 129, 0.0)"
 };
 
+export function getThemeChartColors() {
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  return {
+    gridColor: isDark ? "rgba(255, 255, 255, 0.07)" : "#f1f5f9",
+    tickColor: isDark ? "#94a3b8" : "#64748b",
+    legendColor: isDark ? "#cbd5e1" : "#475569",
+    tooltipBg: isDark ? "#1e293b" : "#0f172a",
+    emptyDoughnut: isDark ? "#1e293b" : "#e2e8f0",
+    doughnutBorder: isDark ? "#131d31" : "#ffffff",
+    pointBg: isDark ? "#131d31" : "#ffffff"
+  };
+}
+
 /**
  * Initialize or update the Trend Line/Area chart
  * @param {string} canvasId 
  * @param {string} filter '7d' | '30d' | 'year'
  */
 export function renderTrendChart(canvasId, filter = "7d") {
+  if (typeof window.Chart === "undefined") return;
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
@@ -88,6 +102,8 @@ export function renderTrendChart(canvasId, filter = "7d") {
     trendChartInstance.destroy();
   }
 
+  const tc = getThemeChartColors();
+
   // @ts-ignore
   trendChartInstance = new window.Chart(ctx, {
     type: "line",
@@ -102,7 +118,7 @@ export function renderTrendChart(canvasId, filter = "7d") {
           backgroundColor: gradient,
           fill: true,
           tension: 0.35,
-          pointBackgroundColor: "#ffffff",
+          pointBackgroundColor: tc.pointBg,
           pointBorderColor: COLORS.primary,
           pointBorderWidth: 2,
           pointRadius: 4,
@@ -116,7 +132,7 @@ export function renderTrendChart(canvasId, filter = "7d") {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "#0f172a",
+          backgroundColor: tc.tooltipBg,
           padding: 10,
           titleFont: { size: 12, weight: "bold" },
           bodyFont: { size: 13 },
@@ -129,15 +145,15 @@ export function renderTrendChart(canvasId, filter = "7d") {
       scales: {
         y: {
           beginAtZero: true,
-          grid: { color: "#f1f5f9" },
+          grid: { color: tc.gridColor },
           ticks: {
-            color: "#64748b",
+            color: tc.tickColor,
             callback: value => `${value} kg`
           }
         },
         x: {
           grid: { display: false },
-          ticks: { color: "#64748b" }
+          ticks: { color: tc.tickColor }
         }
       }
     }
@@ -149,6 +165,7 @@ export function renderTrendChart(canvasId, filter = "7d") {
  * @param {string} canvasId 
  */
 export function renderCategoryChart(canvasId) {
+  if (typeof window.Chart === "undefined") return;
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
@@ -167,10 +184,11 @@ export function renderCategoryChart(canvasId) {
   ];
 
   const total = values.reduce((a, b) => a + b, 0);
+  const tc = getThemeChartColors();
   const isZero = total === 0;
   const chartLabels = isZero ? ["No emissions logged yet"] : labels;
   const chartData = isZero ? [1] : values;
-  const chartBgColors = isZero ? ["#e2e8f0"] : bgColors;
+  const chartBgColors = isZero ? [tc.emptyDoughnut] : bgColors;
 
   if (categoryChartInstance) {
     categoryChartInstance.destroy();
@@ -186,7 +204,7 @@ export function renderCategoryChart(canvasId) {
           data: chartData,
           backgroundColor: chartBgColors,
           borderWidth: 2,
-          borderColor: "#ffffff",
+          borderColor: tc.doughnutBorder,
           hoverOffset: isZero ? 0 : 6
         }
       ]
@@ -202,12 +220,12 @@ export function renderCategoryChart(canvasId) {
           labels: {
             boxWidth: 12,
             padding: 14,
-            color: "#475569",
+            color: tc.legendColor,
             font: { size: 12, weight: "500" }
           }
         },
         tooltip: {
-          backgroundColor: "#0f172a",
+          backgroundColor: tc.tooltipBg,
           padding: 10,
           callbacks: {
             label: context => {
@@ -228,12 +246,14 @@ export function renderCategoryChart(canvasId) {
  * @param {string} canvasId 
  */
 export function renderAnalyticsChart(canvasId) {
+  if (typeof window.Chart === "undefined") return;
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
   const ctx = canvas.getContext("2d");
   const aggregates = store.getAggregates();
   const cb = aggregates.categoryBreakdown;
+  const tc = getThemeChartColors();
 
   if (analyticsChartInstance) {
     analyticsChartInstance.destroy();
@@ -265,6 +285,7 @@ export function renderAnalyticsChart(canvasId) {
       plugins: {
         legend: { display: false },
         tooltip: {
+          backgroundColor: tc.tooltipBg,
           callbacks: {
             label: ctx => ` ${ctx.parsed.y} kg CO₂e`
           }
@@ -273,13 +294,15 @@ export function renderAnalyticsChart(canvasId) {
       scales: {
         y: {
           beginAtZero: true,
-          grid: { color: "#f1f5f9" },
+          grid: { color: tc.gridColor },
           ticks: {
+            color: tc.tickColor,
             callback: val => `${val} kg`
           }
         },
         x: {
-          grid: { display: false }
+          grid: { display: false },
+          ticks: { color: tc.tickColor }
         }
       }
     }

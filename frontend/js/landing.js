@@ -12,6 +12,41 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   // ------------------------------------------------------------------------
+  // Dark / Light Theme Toggle Management
+  // ------------------------------------------------------------------------
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+  const sunIcon = themeToggleBtn?.querySelector(".sun-icon");
+  const moonIcon = themeToggleBtn?.querySelector(".moon-icon");
+
+  function syncThemeIcons(theme) {
+    if (!themeToggleBtn) return;
+    if (theme === "dark") {
+      if (sunIcon) sunIcon.style.display = "block";
+      if (moonIcon) moonIcon.style.display = "none";
+      themeToggleBtn.setAttribute("title", "Switch to Light Mode");
+      themeToggleBtn.setAttribute("aria-label", "Switch to Light Mode");
+    } else {
+      if (sunIcon) sunIcon.style.display = "none";
+      if (moonIcon) moonIcon.style.display = "block";
+      themeToggleBtn.setAttribute("title", "Switch to Dark Mode");
+      themeToggleBtn.setAttribute("aria-label", "Switch to Dark Mode");
+    }
+  }
+
+  const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+  syncThemeIcons(currentTheme);
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener("click", () => {
+      const active = document.documentElement.getAttribute("data-theme") || "light";
+      const next = active === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("ecotrack_theme", next);
+      syncThemeIcons(next);
+    });
+  }
+
+  // ------------------------------------------------------------------------
   // Throttled Scroll Listener (Sticky Header & ScrollSpy)
   // ------------------------------------------------------------------------
   let isTicking = false;

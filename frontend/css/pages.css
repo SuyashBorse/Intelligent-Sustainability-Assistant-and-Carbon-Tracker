@@ -669,3 +669,37 @@
   margin: 0 auto 1.25rem;
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
+
+/* ==========================================================================
+   Dark Mode Page Refinements
+   ========================================================================== */
+[data-theme="dark"] .dashboard-banner {
+  background: linear-gradient(135deg, #064e3b 0%, #0b1528 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .goal-card-item {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .goal-card-item.status-completed {
+  border-color: #059669;
+  background: rgba(6, 78, 59, 0.15);
+}
+
+[data-theme="dark"] .goal-card-item.status-in_progress {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+[data-theme="dark"] .goal-filter-btn.active {
+  background: #064e3b;
+  color: #a7f3d0;
+  border-color: #10b981;
+}
+
+[data-theme="dark"] .rec-impact-pill {
+  color: #34d399;
+}
+
