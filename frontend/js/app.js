@@ -1008,7 +1008,7 @@ async function loadAICoachRecommendations(promptTopic = null) {
               <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                 <span class="badge badge-${rec.category}">${rec.category}</span>
                 <span class="badge badge-${rec.difficulty}">${rec.difficulty}</span>
-                <span class="badge" style="background: #f1f5f9; color: #475569;">Priority: ${rec.priority}</span>
+                <span class="badge badge-priority">Priority: ${rec.priority}</span>
               </div>
               <div class="rec-reason">${rec.reason}</div>
             </div>

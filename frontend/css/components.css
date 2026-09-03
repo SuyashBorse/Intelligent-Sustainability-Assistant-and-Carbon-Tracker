@@ -501,6 +501,12 @@
   color: var(--primary-dark);
 }
 
+.badge-priority {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
 /* ==========================================================================
    Tables
    ========================================================================== */
