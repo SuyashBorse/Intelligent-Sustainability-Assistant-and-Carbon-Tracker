@@ -189,6 +189,7 @@ const INITIAL_STATE = {
       points: 50,
       progress: 3,
       target: 3,
+      adopted: true,
       completed: true
     },
     {
@@ -200,6 +201,7 @@ const INITIAL_STATE = {
       points: 60,
       progress: 4,
       target: 6,
+      adopted: true,
       completed: false
     },
     {
@@ -209,8 +211,9 @@ const INITIAL_STATE = {
       category: "energy",
       difficulty: "easy",
       points: 40,
-      progress: 2,
+      progress: 0,
       target: 5,
+      adopted: false,
       completed: false
     },
     {
@@ -220,8 +223,9 @@ const INITIAL_STATE = {
       category: "shopping",
       difficulty: "hard",
       points: 100,
-      progress: 8,
+      progress: 0,
       target: 14,
+      adopted: false,
       completed: false
     }
   ],
@@ -325,6 +329,14 @@ class CarbonStore {
           }
         });
       }
+
+      if (parsed.challenges && Array.isArray(parsed.challenges)) {
+        parsed.challenges.forEach(c => {
+          if (c.adopted === undefined) {
+            c.adopted = Boolean(c.completed || (c.progress > 0));
+          }
+        });
+      }
       return parsed;
     } catch (e) {
       console.warn("Could not parse local storage, loading defaults", e);
@@ -400,9 +412,41 @@ class CarbonStore {
     this.saveState();
   }
 
+  adoptChallenge(id) {
+    const challenge = this.state.challenges.find(c => c.id === id);
+    if (challenge && !challenge.completed) {
+      challenge.adopted = true;
+      if (typeof challenge.progress !== "number") challenge.progress = 0;
+      this.saveState();
+      return challenge;
+    }
+    return null;
+  }
+
+  addChallengeProgress(id, amount = 1) {
+    const challenge = this.state.challenges.find(c => c.id === id);
+    if (challenge && !challenge.completed) {
+      challenge.adopted = true;
+      const numAmount = Math.max(1, Number(amount) || 1);
+      challenge.progress = Math.min(challenge.target, (challenge.progress || 0) + numAmount);
+
+      let completedNow = false;
+      if (challenge.progress >= challenge.target) {
+        challenge.completed = true;
+        challenge.progress = challenge.target;
+        this.state.user.points += challenge.points;
+        completedNow = true;
+      }
+      this.saveState();
+      return { challenge, completedNow };
+    }
+    return null;
+  }
+
   completeChallenge(id) {
     const challenge = this.state.challenges.find(c => c.id === id);
     if (challenge && !challenge.completed) {
+      challenge.adopted = true;
       challenge.completed = true;
       challenge.progress = challenge.target;
       this.state.user.points += challenge.points;
@@ -539,6 +583,7 @@ class CarbonStore {
           unit: "trips",
           points: 50,
           difficulty: "easy",
+          adopted: false,
           completed: false
         },
         {
@@ -551,6 +596,7 @@ class CarbonStore {
           unit: "meals",
           points: 50,
           difficulty: "medium",
+          adopted: false,
           completed: false
         },
         {
@@ -563,6 +609,7 @@ class CarbonStore {
           unit: "days",
           points: 60,
           difficulty: "hard",
+          adopted: false,
           completed: false
         },
         {
@@ -575,6 +622,7 @@ class CarbonStore {
           unit: "days",
           points: 75,
           difficulty: "medium",
+          adopted: false,
           completed: false
         }
       ],

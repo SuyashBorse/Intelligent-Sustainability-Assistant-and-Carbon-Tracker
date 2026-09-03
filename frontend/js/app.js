@@ -217,45 +217,53 @@ function updateGamificationUI() {
   // Challenges grid
   const challengesGrid = document.getElementById("challengesGrid");
   if (challengesGrid) {
-    challengesGrid.innerHTML = state.challenges.map(c => `
-      <div class="challenge-card ${c.completed ? 'completed' : ''}">
-        <div>
-          <div class="challenge-top">
-            <span class="badge badge-${c.category}">${c.category}</span>
-            <span class="challenge-points-chip">+${c.points} pts</span>
-          </div>
-          <h4 style="margin: 0.75rem 0 0.25rem;">${c.title}</h4>
-          <p style="font-size: 0.82rem; color: var(--text-muted);">${c.description}</p>
-        </div>
-        
-        <div>
-          <div class="progress-track" style="margin: 0.5rem 0;">
-            <div class="progress-bar-fill" style="width: ${(c.progress / c.target) * 100}%"></div>
-          </div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.78rem;">
-            <span>Progress: ${c.progress} / ${c.target}</span>
-            <span class="badge badge-${c.difficulty}">${c.difficulty}</span>
-          </div>
-          ${c.completed 
-            ? `<button class="btn btn-secondary btn-sm btn-block" disabled style="color: var(--primary); font-weight: 700;">✓ Completed (+${c.points} pts)</button>`
-            : `<button class="btn btn-primary btn-sm btn-block btn-claim-challenge" data-id="${c.id}">Complete Challenge</button>`
-          }
-        </div>
-      </div>
-    `).join("");
+    challengesGrid.innerHTML = state.challenges.map(c => {
+      const isCompleted = Boolean(c.completed);
+      const isAdopted = Boolean(c.adopted);
+      const pct = Math.min(100, Math.round(((c.progress || 0) / c.target) * 100));
 
-    document.querySelectorAll(".btn-claim-challenge").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-id");
-        if (id) {
-          const finished = store.completeChallenge(id);
-          if (finished) {
-            showToast(`🎉 Challenge completed! +${finished.points} points awarded!`, "success");
-            evaluateAchievements();
-          }
-        }
-      });
-    });
+      return `
+        <div class="challenge-card ${isCompleted ? 'completed' : isAdopted ? 'adopted' : ''}">
+          <div>
+            <div class="challenge-top">
+              <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+                <span class="badge badge-${c.category}">${c.category}</span>
+                ${isCompleted 
+                  ? `<span class="badge badge-completed">✓ Completed</span>` 
+                  : isAdopted 
+                  ? `<span class="badge badge-in-progress">In Progress</span>` 
+                  : `<span class="badge badge-not-started">Available</span>`
+                }
+              </div>
+              <span class="challenge-points-chip">+${c.points} pts</span>
+            </div>
+            <h4 style="margin: 0.75rem 0 0.25rem;">${c.title}</h4>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">${c.description}</p>
+          </div>
+          
+          <div>
+            <div class="progress-track" style="margin: 0.5rem 0;">
+              <div class="progress-bar-fill" style="width: ${pct}%"></div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.78rem;">
+              <span>Progress: <strong>${c.progress || 0} / ${c.target}</strong> (${pct}%)</span>
+              <span class="badge badge-${c.difficulty}">${c.difficulty}</span>
+            </div>
+            ${isCompleted 
+              ? `<button class="btn btn-secondary btn-sm btn-block" disabled style="color: var(--primary); font-weight: 700; background: #ecfdf5; border-color: #a7f3d0;">✓ Completed (+${c.points} pts)</button>`
+              : !isAdopted
+              ? `<button class="btn btn-primary btn-sm btn-block btn-adopt-challenge" data-id="${c.id}" style="font-weight: 600;">🎯 Adopt Challenge</button>`
+              : `
+                <div style="display: flex; gap: 0.5rem;">
+                  <button class="btn btn-secondary btn-sm btn-quick-challenge-step" data-id="${c.id}" style="flex: 1; white-space: nowrap; font-weight: 600;" title="Quickly add 1 step">+1 Step</button>
+                  <button class="btn btn-primary btn-sm btn-open-challenge-progress" data-id="${c.id}" style="flex: 1.5; white-space: nowrap; font-weight: 600;">+ Add Progress</button>
+                </div>
+              `
+            }
+          </div>
+        </div>
+      `;
+    }).join("");
   }
 
   // Badges grid
@@ -535,6 +543,154 @@ function setupGoalProgressModal() {
       updateGoalsUI();
     });
   });
+}
+
+// ==========================================================================
+// Challenge Progress Management Modal
+// ==========================================================================
+function openChallengeProgressModal(challengeId) {
+  const state = store.getState();
+  const challenge = state.challenges.find(c => c.id === challengeId);
+  if (!challenge) return;
+
+  const modal = document.getElementById("challengeProgressModal");
+  if (!modal) return;
+
+  const targetIdInput = document.getElementById("challengeModalTargetId");
+  const nameEl = document.getElementById("challengeModalName");
+  const descEl = document.getElementById("challengeModalDesc");
+  const pointsBadge = document.getElementById("challengeModalPointsBadge");
+  const catBadge = document.getElementById("challengeModalCatBadge");
+  const diffBadge = document.getElementById("challengeModalDiffBadge");
+  const curProgressEl = document.getElementById("challengeModalCurrentProgress");
+  const targetNumEl = document.getElementById("challengeModalTargetNum");
+  const incInput = document.getElementById("challengeIncrementInput");
+
+  if (targetIdInput) targetIdInput.value = challenge.id;
+  if (nameEl) nameEl.textContent = challenge.title;
+  if (descEl) descEl.textContent = challenge.description;
+  if (pointsBadge) pointsBadge.textContent = `+${challenge.points} pts`;
+  if (catBadge) {
+    catBadge.className = `badge badge-${challenge.category}`;
+    catBadge.textContent = challenge.category;
+  }
+  if (diffBadge) {
+    diffBadge.className = `badge badge-${challenge.difficulty}`;
+    diffBadge.textContent = challenge.difficulty;
+  }
+  if (curProgressEl) curProgressEl.textContent = `${challenge.progress || 0} / ${challenge.target}`;
+  if (targetNumEl) targetNumEl.textContent = String(challenge.target);
+
+  const remaining = Math.max(1, challenge.target - (challenge.progress || 0));
+  if (incInput) {
+    incInput.value = "1";
+    incInput.max = String(remaining);
+  }
+
+  updateChallengeModalPreview(challenge.progress || 0, challenge.target, 1);
+  modal.classList.add("open");
+}
+
+function closeChallengeProgressModal() {
+  const modal = document.getElementById("challengeProgressModal");
+  if (modal) modal.classList.remove("open");
+}
+
+function updateChallengeModalPreview(currentProgress, target, increment) {
+  const inc = Math.max(0, Number(increment) || 0);
+  const newProgress = Math.min(target, currentProgress + inc);
+  const pct = Math.min(100, Math.round((newProgress / target) * 100));
+  const previewBar = document.getElementById("challengeModalPreviewBar");
+  const projectedText = document.getElementById("challengeModalProjectedProgress");
+
+  if (previewBar) previewBar.style.width = `${pct}%`;
+  if (projectedText) {
+    if (newProgress >= target) {
+      projectedText.textContent = `New: ${newProgress} / ${target} (Complete! 🎉)`;
+      projectedText.style.color = "var(--primary)";
+    } else {
+      projectedText.textContent = `New: ${newProgress} / ${target} (${pct}%)`;
+      projectedText.style.color = "var(--info)";
+    }
+  }
+}
+
+function setupChallengeProgressModal() {
+  const modal = document.getElementById("challengeProgressModal");
+  const closeBtn = document.getElementById("challengeModalCloseBtn");
+  const cancelBtn = document.getElementById("challengeModalCancelBtn");
+  const form = document.getElementById("challengeProgressForm");
+  const incInput = document.getElementById("challengeIncrementInput");
+  const reachTargetBtn = document.getElementById("btnReachChallengeTarget");
+
+  if (closeBtn) closeBtn.addEventListener("click", closeChallengeProgressModal);
+  if (cancelBtn) cancelBtn.addEventListener("click", closeChallengeProgressModal);
+
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeChallengeProgressModal();
+    });
+  }
+
+  // Quick increment chips
+  document.querySelectorAll(".challenge-quick-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const inc = parseInt(chip.getAttribute("data-inc"), 10);
+      if (incInput && !isNaN(inc)) {
+        incInput.value = String(inc);
+        const challengeId = document.getElementById("challengeModalTargetId")?.value;
+        const challenge = store.getState().challenges.find(c => c.id === challengeId);
+        if (challenge) {
+          updateChallengeModalPreview(challenge.progress || 0, challenge.target, inc);
+        }
+      }
+    });
+  });
+
+  if (reachTargetBtn) {
+    reachTargetBtn.addEventListener("click", () => {
+      const challengeId = document.getElementById("challengeModalTargetId")?.value;
+      const challenge = store.getState().challenges.find(c => c.id === challengeId);
+      if (challenge && incInput) {
+        const remaining = Math.max(1, challenge.target - (challenge.progress || 0));
+        incInput.value = String(remaining);
+        updateChallengeModalPreview(challenge.progress || 0, challenge.target, remaining);
+      }
+    });
+  }
+
+  if (incInput) {
+    incInput.addEventListener("input", () => {
+      const challengeId = document.getElementById("challengeModalTargetId")?.value;
+      const challenge = store.getState().challenges.find(c => c.id === challengeId);
+      if (challenge) {
+        const inc = Math.max(0, parseInt(incInput.value, 10) || 0);
+        updateChallengeModalPreview(challenge.progress || 0, challenge.target, inc);
+      }
+    });
+  }
+
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const challengeId = document.getElementById("challengeModalTargetId")?.value;
+      const inc = Math.max(1, parseInt(incInput?.value, 10) || 1);
+
+      if (challengeId) {
+        const res = store.addChallengeProgress(challengeId, inc);
+        closeChallengeProgressModal();
+        if (res) {
+          if (res.completedNow) {
+            showToast(`🎉 Challenge completed: "${res.challenge.title}"! +${res.challenge.points} points awarded! 🏆`, "success");
+            evaluateAchievements();
+          } else {
+            showToast(`📈 Progress updated for "${res.challenge.title}": ${res.challenge.progress}/${res.challenge.target}`, "info");
+          }
+          updateGamificationUI();
+        }
+      }
+    });
+  }
 }
 
 // ==========================================================================
@@ -1041,6 +1197,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Setup forms & first render
   setupActivityForm();
   setupGoalProgressModal();
+  setupChallengeProgressModal();
   setupProfileHandlers();
   updateUserProfileUI();
   updateDashboardUI();
@@ -1048,13 +1205,59 @@ document.addEventListener("DOMContentLoaded", () => {
   renderCategoryChart("categoryChartCanvas");
   loadAICoachRecommendations();
 
-  // Delegated click handler for Goal Progress Buttons
+  // Delegated click handler for Goal & Challenge Progress Buttons
   document.addEventListener("click", (e) => {
+    // Goal progress
     const goalBtn = e.target.closest(".btn-open-goal-progress");
     if (goalBtn) {
       e.preventDefault();
       const goalId = goalBtn.getAttribute("data-id");
       if (goalId) openGoalProgressModal(goalId);
+      return;
+    }
+
+    // Adopt challenge
+    const adoptBtn = e.target.closest(".btn-adopt-challenge");
+    if (adoptBtn) {
+      e.preventDefault();
+      const id = adoptBtn.getAttribute("data-id");
+      if (id) {
+        const adopted = store.adoptChallenge(id);
+        if (adopted) {
+          showToast(`🎯 Challenge adopted: "${adopted.title}"! Start logging progress.`, "success");
+          updateGamificationUI();
+        }
+      }
+      return;
+    }
+
+    // Quick +1 step challenge
+    const quickStepBtn = e.target.closest(".btn-quick-challenge-step");
+    if (quickStepBtn) {
+      e.preventDefault();
+      const id = quickStepBtn.getAttribute("data-id");
+      if (id) {
+        const res = store.addChallengeProgress(id, 1);
+        if (res) {
+          if (res.completedNow) {
+            showToast(`🎉 Challenge completed: "${res.challenge.title}"! +${res.challenge.points} points awarded! 🏆`, "success");
+            evaluateAchievements();
+          } else {
+            showToast(`📈 Progress added to "${res.challenge.title}": ${res.challenge.progress}/${res.challenge.target}`, "info");
+          }
+          updateGamificationUI();
+        }
+      }
+      return;
+    }
+
+    // Open challenge progress modal
+    const challengeProgBtn = e.target.closest(".btn-open-challenge-progress");
+    if (challengeProgBtn) {
+      e.preventDefault();
+      const id = challengeProgBtn.getAttribute("data-id");
+      if (id) openChallengeProgressModal(id);
+      return;
     }
   });
 
@@ -1062,6 +1265,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.switchView = switchView;
   window.openGoalProgressModal = openGoalProgressModal;
   window.closeGoalProgressModal = closeGoalProgressModal;
+  window.openChallengeProgressModal = openChallengeProgressModal;
+  window.closeChallengeProgressModal = closeChallengeProgressModal;
   window.openNewProfileModal = openNewProfileModal;
   window.closeNewProfileModal = closeNewProfileModal;
 

@@ -421,6 +421,11 @@
   background: #fcfdfd;
 }
 
+.challenge-card.adopted {
+  border-color: #bfdbfe;
+  background: #fbfdff;
+}
+
 .challenge-top {
   display: flex;
   align-items: flex-start;

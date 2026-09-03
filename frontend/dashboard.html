@@ -791,6 +791,72 @@
   </div>
 
   <!-- ======================================================================
+       MODAL: Update Challenge Progress
+       ====================================================================== -->
+  <div class="modal-overlay" id="challengeProgressModal" role="dialog" aria-modal="true" aria-labelledby="challengeModalTitle">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 id="challengeModalTitle" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.25rem;">🎯</span> Log Challenge Progress
+        </h3>
+        <button class="modal-close-btn" id="challengeModalCloseBtn" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="challengeProgressForm">
+        <input type="hidden" id="challengeModalTargetId" />
+        <div class="modal-body">
+          <div style="margin-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+              <h4 id="challengeModalName" style="margin: 0; font-size: 1.1rem; color: var(--text-main);">Challenge Title</h4>
+              <span id="challengeModalPointsBadge" class="challenge-points-chip">+50 pts</span>
+            </div>
+            <p id="challengeModalDesc" style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 0.6rem;"></p>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <span id="challengeModalCatBadge" class="badge">Category</span>
+              <span id="challengeModalDiffBadge" class="badge">Difficulty</span>
+              <span class="badge badge-in-progress">In Progress</span>
+            </div>
+          </div>
+
+          <div style="background: var(--surface-alt); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
+              <span style="color: var(--text-muted);">Current Progress:</span>
+              <strong id="challengeModalCurrentProgress" style="color: var(--primary-dark);">0 / 5</strong>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill" id="challengeModalPreviewBar" style="width: 0%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); margin-top: 0.4rem;">
+              <span>Target: <strong id="challengeModalTargetNum">5</strong></span>
+              <span id="challengeModalProjectedProgress" style="font-weight: 700; color: var(--primary);">New: 1 / 5</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="challengeIncrementInput">Progress Amount to Add <span class="req">*</span></label>
+            <input type="number" min="1" class="form-input" id="challengeIncrementInput" value="1" required />
+            <div class="progress-quick-chips" style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="button" class="chip-btn challenge-quick-chip" data-inc="1">+1 Step</button>
+              <button type="button" class="chip-btn challenge-quick-chip" data-inc="2">+2 Steps</button>
+              <button type="button" class="chip-btn challenge-quick-chip" data-inc="3">+3 Steps</button>
+              <button type="button" class="chip-btn" id="btnReachChallengeTarget" style="background: var(--primary-light); color: var(--primary-dark); border-color: var(--primary);">Reach Target 🎯</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="challengeModalCancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitChallengeProgress">
+            Save Progress
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
        MODAL: Create / Switch User Profile
        ====================================================================== -->
   <div class="modal-overlay" id="newProfileModal" role="dialog" aria-modal="true" aria-labelledby="newProfileTitle">
