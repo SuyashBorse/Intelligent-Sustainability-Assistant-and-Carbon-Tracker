@@ -27,13 +27,13 @@ const COLORS = {
 export function getThemeChartColors() {
   const isDark = document.documentElement.getAttribute("data-theme") === "dark";
   return {
-    gridColor: isDark ? "rgba(255, 255, 255, 0.07)" : "#f1f5f9",
-    tickColor: isDark ? "#94a3b8" : "#64748b",
-    legendColor: isDark ? "#cbd5e1" : "#475569",
-    tooltipBg: isDark ? "#1e293b" : "#0f172a",
-    emptyDoughnut: isDark ? "#1e293b" : "#e2e8f0",
-    doughnutBorder: isDark ? "#131d31" : "#ffffff",
-    pointBg: isDark ? "#131d31" : "#ffffff"
+    gridColor: isDark ? "rgba(255, 255, 255, 0.06)" : "#f1f5f9",
+    tickColor: isDark ? "#71717a" : "#64748b",
+    legendColor: isDark ? "#a1a1aa" : "#475569",
+    tooltipBg: isDark ? "#18181b" : "#0f172a",
+    emptyDoughnut: isDark ? "#27272a" : "#e2e8f0",
+    doughnutBorder: isDark ? "#141417" : "#ffffff",
+    pointBg: isDark ? "#141417" : "#ffffff"
   };
 }
 

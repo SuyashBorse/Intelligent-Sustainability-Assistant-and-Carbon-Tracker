@@ -674,8 +674,9 @@
    Dark Mode Page Refinements
    ========================================================================== */
 [data-theme="dark"] .dashboard-banner {
-  background: linear-gradient(135deg, #064e3b 0%, #0b1528 100%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, #06381e 0%, #09090b 100%);
+  border: 1px solid #143522;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
 }
 
 [data-theme="dark"] .goal-card-item {
@@ -685,12 +686,34 @@
 
 [data-theme="dark"] .goal-card-item.status-completed {
   border-color: #059669;
-  background: rgba(6, 78, 59, 0.15);
+  background: rgba(16, 185, 129, 0.08);
 }
 
 [data-theme="dark"] .goal-card-item.status-in_progress {
   border-color: #3b82f6;
-  background: rgba(59, 130, 246, 0.12);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+[data-theme="dark"] .challenge-card.adopted {
+  border-color: #3f3f46;
+  background: var(--surface-hover);
+}
+
+[data-theme="dark"] .challenge-card.completed {
+  border-color: #059669;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+[data-theme="dark"] .goal-filter-btn {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .goal-filter-btn:hover {
+  border-color: #3f3f46;
+  background: var(--surface-hover);
+  color: var(--text-main);
 }
 
 [data-theme="dark"] .goal-filter-btn.active {
@@ -702,4 +725,5 @@
 [data-theme="dark"] .rec-impact-pill {
   color: #34d399;
 }
+
 

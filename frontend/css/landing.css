@@ -691,8 +691,16 @@ section[id],
   border-bottom-color: var(--border) !important;
 }
 
+[data-theme="dark"] .hero-preview-section {
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="dark"] .hero-preview-section:hover {
+  border-color: #3f3f46;
+}
+
 [data-theme="dark"] .preview-result-card {
-  background: linear-gradient(135deg, rgba(6, 78, 59, 0.45) 0%, rgba(6, 95, 70, 0.25) 100%);
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.2) 0%, rgba(16, 185, 129, 0.08) 100%);
   border-color: rgba(16, 185, 129, 0.3);
 }
 
@@ -700,8 +708,18 @@ section[id],
   color: #34d399;
 }
 
-[data-theme="dark"] .hero-preview-section:hover {
-  border-color: #334155;
+[data-theme="dark"] .feature-card:hover {
+  border-color: #10b981;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .step-card:hover {
+  border-color: #10b981;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .login-modal-box {
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.95);
 }
 
 [data-theme="dark"] .hero-trust-item {
@@ -731,6 +749,6 @@ section[id],
 
 [data-theme="dark"] .oauth-btn:hover {
   background: var(--surface-hover);
-  border-color: #cbd5e1;
+  border-color: #3f3f46;
 }
 

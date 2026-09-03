@@ -670,11 +670,12 @@
    Dark Mode Component Refinements
    ========================================================================== */
 [data-theme="dark"] .score-bg-ring {
-  stroke: #22324d;
+  stroke: #27272a;
 }
 
 [data-theme="dark"] .modal-box {
   border: 1px solid var(--border);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
 }
 
 [data-theme="dark"] .form-input,
@@ -701,6 +702,7 @@
 [data-theme="dark"] .chip-btn:hover {
   background: var(--surface-hover);
   color: var(--text-main);
+  border-color: #3f3f46;
 }
 
 [data-theme="dark"] .btn-secondary {
@@ -711,10 +713,11 @@
 
 [data-theme="dark"] .btn-secondary:hover {
   background: var(--surface-hover);
-  border-color: #3b82f6;
+  border-color: #3f3f46;
 }
 
 [data-theme="dark"] .card:hover {
-  border-color: #334155;
+  border-color: #3f3f46;
 }
+
 
