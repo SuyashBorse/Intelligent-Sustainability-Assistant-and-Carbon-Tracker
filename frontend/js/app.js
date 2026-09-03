@@ -1076,8 +1076,9 @@ async function loadAICoachRecommendations(promptTopic = null) {
 // Responsive & Smooth Sidebar Management
 // ==========================================================================
 function initSidebarControls() {
-  const toggleBtn = document.getElementById("sidebarToggleBtn");
   const collapseBtn = document.getElementById("sidebarCollapseBtn");
+  const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+  const sidebar = document.querySelector(".app-sidebar");
   const backdrop = document.getElementById("sidebarBackdrop");
 
   // Restore desktop preference
@@ -1086,29 +1087,55 @@ function initSidebarControls() {
     document.body.classList.add("sidebar-collapsed");
   }
 
-  function toggleSidebar() {
-    if (window.innerWidth <= 1024) {
-      // Mobile / Tablet overlay mode
-      document.body.classList.toggle("sidebar-open");
-    } else {
-      // Desktop collapse mode
-      document.body.classList.toggle("sidebar-collapsed");
-      const collapsed = document.body.classList.contains("sidebar-collapsed");
-      localStorage.setItem("sidebar_collapsed", String(collapsed));
-    }
+  // Collapse sidebar button (in sidebar header)
+  if (collapseBtn) {
+    collapseBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (window.innerWidth <= 1024) {
+        document.body.classList.remove("sidebar-open");
+      } else {
+        document.body.classList.add("sidebar-collapsed");
+        localStorage.setItem("sidebar_collapsed", "true");
+      }
+      setTimeout(() => {
+        window.dispatchEvent(new Event("resize"));
+      }, 360);
+    });
+  }
 
-    // Smoothly re-adjust Chart.js canvas once animation completes
-    setTimeout(() => {
-      window.dispatchEvent(new Event("resize"));
-    }, 360);
+  // When sidebar is in minimum (collapsed), click anywhere on it to open it
+  if (sidebar) {
+    sidebar.addEventListener("click", (e) => {
+      if (window.innerWidth > 1024 && document.body.classList.contains("sidebar-collapsed")) {
+        // If clicking logout button, let logout proceed
+        if (e.target.closest(".btn-logout")) return;
+
+        // Prevent navigating away to homepage if clicking brand when in minimum
+        if (e.target.closest(".sidebar-brand-group")) {
+          e.preventDefault();
+        }
+
+        document.body.classList.remove("sidebar-collapsed");
+        localStorage.setItem("sidebar_collapsed", "false");
+
+        setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, 360);
+      }
+    });
+  }
+
+  // Mobile menu button
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener("click", () => {
+      document.body.classList.toggle("sidebar-open");
+    });
   }
 
   function closeMobileSidebar() {
     document.body.classList.remove("sidebar-open");
   }
 
-  if (toggleBtn) toggleBtn.addEventListener("click", toggleSidebar);
-  if (collapseBtn) collapseBtn.addEventListener("click", toggleSidebar);
   if (backdrop) backdrop.addEventListener("click", closeMobileSidebar);
 
   // Close with Escape key
@@ -1117,6 +1144,7 @@ function initSidebarControls() {
       closeMobileSidebar();
       closeActivityModal();
       closeGoalProgressModal();
+      closeChallengeProgressModal();
       closeNewProfileModal();
     }
   });
