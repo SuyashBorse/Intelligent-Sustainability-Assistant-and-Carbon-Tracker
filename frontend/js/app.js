@@ -15,6 +15,153 @@ let currentSelectedCategory = "transportation";
 let activeTrendFilter = "7d";
 
 // ==========================================================================
+// Animation Engine & Visual Motion Utilities
+// ==========================================================================
+
+/**
+ * Universal high-performance number animator with cubic-bezier ease-out interpolation
+ */
+export function animateValue(element, start, end, duration = 650, formatter = v => String(Math.round(v))) {
+  if (!element) return;
+  const startNum = Number(start) || 0;
+  const endNum = Number(end) || 0;
+  if (startNum === endNum) {
+    element.textContent = formatter(endNum);
+    return;
+  }
+
+  const startTime = performance.now();
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(1, elapsed / duration);
+    // easeOutCubic: fast responsive start, silky smooth deceleration
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const current = startNum + (endNum - startNum) * ease;
+    element.textContent = formatter(current);
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      element.textContent = formatter(endNum);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+/**
+ * Smooth modal exit animation helper
+ */
+export function closeModalSmooth(modalEl, callback) {
+  if (!modalEl) return;
+  modalEl.classList.add("modal-closing");
+  setTimeout(() => {
+    modalEl.classList.remove("open");
+    modalEl.classList.remove("modal-closing");
+    if (typeof callback === "function") callback();
+  }, 240);
+}
+
+/**
+ * Zero-dependency celebration confetti burst engine on canvas
+ */
+export function launchConfetti(originX = null, originY = null) {
+  const canvas = document.getElementById("confettiCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const startX = originX !== null ? originX : canvas.width / 2;
+  const startY = originY !== null ? originY : canvas.height * 0.4;
+
+  const colors = ["#10b981", "#059669", "#3b82f6", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"];
+  const particles = [];
+  const count = 70;
+
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
+    const velocity = 6 + Math.random() * 8;
+    particles.push({
+      x: startX,
+      y: startY,
+      vx: Math.cos(angle) * velocity,
+      vy: Math.sin(angle) * velocity - 3,
+      size: 6 + Math.random() * 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      vRot: (Math.random() - 0.5) * 14,
+      gravity: 0.22,
+      opacity: 1,
+      shape: Math.random() > 0.4 ? "rect" : "circle"
+    });
+  }
+
+  let animationFrameId;
+  const startTime = performance.now();
+
+  function renderFrame(now) {
+    const elapsed = now - startTime;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let activeCount = 0;
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += p.gravity;
+      p.vx *= 0.985;
+      p.rotation += p.vRot;
+      p.opacity = Math.max(0, 1 - elapsed / 1800);
+
+      if (p.opacity > 0 && p.y < canvas.height + 20) {
+        activeCount++;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+
+        if (p.shape === "rect") {
+          ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size / 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    });
+
+    if (activeCount > 0 && elapsed < 2000) {
+      animationFrameId = requestAnimationFrame(renderFrame);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      cancelAnimationFrame(animationFrameId);
+    }
+  }
+
+  animationFrameId = requestAnimationFrame(renderFrame);
+}
+
+/**
+ * Spawns a delightful floating step bubble (+1 Step) over the clicked button
+ */
+export function spawnFloatingStepBubble(anchorEl, text = "+1 Step") {
+  if (!anchorEl) return;
+  const rect = anchorEl.getBoundingClientRect();
+  const bubble = document.createElement("div");
+  bubble.className = "floating-step-bubble";
+  bubble.textContent = text;
+  bubble.style.left = `${rect.left + rect.width / 2}px`;
+  bubble.style.top = `${rect.top}px`;
+  document.body.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 950);
+}
+
+// ==========================================================================
 // Toast Notification Utility
 // ==========================================================================
 export function showToast(message, type = "success") {
@@ -27,20 +174,22 @@ export function showToast(message, type = "success") {
   let iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>`;
   if (type === "error") {
     iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+  } else if (type === "info") {
+    iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
   }
 
   toast.innerHTML = `
-    <div style="color: ${type === 'error' ? 'var(--danger)' : 'var(--primary)'}">${iconSvg}</div>
-    <div style="font-size: 0.88rem; font-weight: 500;">${message}</div>
+    <div style="color: ${type === 'error' ? 'var(--danger)' : type === 'info' ? 'var(--info)' : 'var(--primary)'}">${iconSvg}</div>
+    <div style="font-size: 0.88rem; font-weight: 500; flex: 1;">${message}</div>
+    <div class="toast-progress"></div>
   `;
 
   container.appendChild(toast);
 
   setTimeout(() => {
     toast.style.opacity = "0";
-    toast.style.transform = "translateY(10px)";
-    toast.style.transition = "all 0.25s ease";
-    setTimeout(() => toast.remove(), 250);
+    toast.style.transform = "translateX(20px) scale(0.95)";
+    setTimeout(() => toast.remove(), 260);
   }, 3500);
 }
 
@@ -108,21 +257,51 @@ function updateDashboardUI() {
   if (topbarStreak) topbarStreak.textContent = `${state.user.streak} Days`;
 
   const topbarPoints = document.getElementById("topbarPointsVal");
-  if (topbarPoints) topbarPoints.textContent = `${state.user.points} pts`;
+  if (topbarPoints) {
+    const prevPoints = parseInt(topbarPoints.getAttribute("data-val") || "0", 10) || state.user.points;
+    if (prevPoints !== state.user.points) {
+      animateValue(topbarPoints, prevPoints, state.user.points, 750, v => `${Math.round(v)} pts`);
+      const pill = topbarPoints.closest(".points-pill");
+      if (pill) {
+        pill.classList.remove("points-bump");
+        void pill.offsetWidth;
+        pill.classList.add("points-bump");
+      }
+    } else {
+      topbarPoints.textContent = `${state.user.points} pts`;
+    }
+    topbarPoints.setAttribute("data-val", String(state.user.points));
+  }
 
-  // KPI values
+  // KPI values with smooth count-up
   const kpiToday = document.getElementById("kpiTodayVal");
-  if (kpiToday) kpiToday.textContent = aggregates.todayCo2.toFixed(1);
+  if (kpiToday) {
+    const prev = parseFloat(kpiToday.getAttribute("data-val") || "0") || aggregates.todayCo2;
+    animateValue(kpiToday, prev, aggregates.todayCo2, 700, v => v.toFixed(1));
+    kpiToday.setAttribute("data-val", String(aggregates.todayCo2));
+  }
 
   const kpiWeek = document.getElementById("kpiWeekVal");
-  if (kpiWeek) kpiWeek.textContent = aggregates.weekCo2.toFixed(1);
+  if (kpiWeek) {
+    const prev = parseFloat(kpiWeek.getAttribute("data-val") || "0") || aggregates.weekCo2;
+    animateValue(kpiWeek, prev, aggregates.weekCo2, 700, v => v.toFixed(1));
+    kpiWeek.setAttribute("data-val", String(aggregates.weekCo2));
+  }
 
   const kpiMonth = document.getElementById("kpiMonthVal");
-  if (kpiMonth) kpiMonth.textContent = aggregates.monthCo2.toFixed(1);
+  if (kpiMonth) {
+    const prev = parseFloat(kpiMonth.getAttribute("data-val") || "0") || aggregates.monthCo2;
+    animateValue(kpiMonth, prev, aggregates.monthCo2, 700, v => v.toFixed(1));
+    kpiMonth.setAttribute("data-val", String(aggregates.monthCo2));
+  }
 
   // Sustainability Score Gauge
   const scoreVal = document.getElementById("scoreVal");
-  if (scoreVal) scoreVal.textContent = aggregates.sustainabilityScore;
+  if (scoreVal) {
+    const prev = parseInt(scoreVal.getAttribute("data-val") || "0", 10) || aggregates.sustainabilityScore;
+    animateValue(scoreVal, prev, aggregates.sustainabilityScore, 900, v => String(Math.round(v)));
+    scoreVal.setAttribute("data-val", String(aggregates.sustainabilityScore));
+  }
 
   const scoreRing = document.getElementById("scoreRingProgress");
   if (scoreRing) {
@@ -212,7 +391,15 @@ function updateGamificationUI() {
   if (heroStreak) heroStreak.innerHTML = `${state.user.streak} <span>🔥</span>`;
 
   const heroPoints = document.getElementById("heroPointsCount");
-  if (heroPoints) heroPoints.textContent = state.user.points;
+  if (heroPoints) {
+    const prev = parseInt(heroPoints.getAttribute("data-val") || "0", 10) || state.user.points;
+    if (prev !== state.user.points) {
+      animateValue(heroPoints, prev, state.user.points, 750, v => String(Math.round(v)));
+    } else {
+      heroPoints.textContent = String(state.user.points);
+    }
+    heroPoints.setAttribute("data-val", String(state.user.points));
+  }
 
   // Challenges grid
   const challengesGrid = document.getElementById("challengesGrid");
@@ -223,7 +410,7 @@ function updateGamificationUI() {
       const pct = Math.min(100, Math.round(((c.progress || 0) / c.target) * 100));
 
       return `
-        <div class="challenge-card ${isCompleted ? 'completed' : isAdopted ? 'adopted' : ''}">
+        <div class="challenge-card ${isCompleted ? 'completed' : isAdopted ? 'adopted' : ''}" data-challenge-id="${c.id}">
           <div>
             <div class="challenge-top">
               <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
@@ -243,10 +430,10 @@ function updateGamificationUI() {
           
           <div>
             <div class="progress-track" style="margin: 0.5rem 0;">
-              <div class="progress-bar-fill" style="width: ${pct}%"></div>
+              <div class="progress-bar-fill" data-challenge-bar="${c.id}" style="width: ${pct}%"></div>
             </div>
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.78rem;">
-              <span>Progress: <strong>${c.progress || 0} / ${c.target}</strong> (${pct}%)</span>
+              <span data-challenge-text="${c.id}">Progress: <strong>${c.progress || 0} / ${c.target}</strong> (${pct}%)</span>
               <span class="badge badge-${c.difficulty}">${c.difficulty}</span>
             </div>
             ${isCompleted 
@@ -302,7 +489,7 @@ function renderGoalCardHtml(g) {
   const isNotStarted = g.status === "not_started" || g.currentProgressPercent === 0;
 
   return `
-    <div class="goal-card-item status-${g.status}">
+    <div class="goal-card-item status-${g.status}" data-goal-id="${g.id}">
       <div class="goal-header-row">
         <div>
           <div class="goal-title">${g.title}</div>
@@ -314,7 +501,7 @@ function renderGoalCardHtml(g) {
       </div>
 
       <div class="progress-track">
-        <div class="progress-bar-fill" style="width: ${g.currentProgressPercent}%"></div>
+        <div class="progress-bar-fill" data-goal-bar="${g.id}" style="width: ${g.currentProgressPercent}%"></div>
       </div>
 
       <div class="goal-footer">
@@ -323,7 +510,7 @@ function renderGoalCardHtml(g) {
           <span>•</span>
           <span>Due: <strong>${g.targetDate}</strong></span>
           <span>•</span>
-          <strong style="color: ${isCompleted ? 'var(--primary)' : isNotStarted ? 'var(--text-muted)' : 'var(--info)'};">
+          <strong data-goal-pct="${g.id}" style="color: ${isCompleted ? 'var(--primary)' : isNotStarted ? 'var(--text-muted)' : 'var(--info)'};">
             ${g.currentProgressPercent}% Achieved
           </strong>
         </div>
@@ -339,6 +526,51 @@ function renderGoalCardHtml(g) {
       </div>
     </div>
   `;
+}
+
+/**
+ * Smooth in-place goal card progress animator with number rolling and card highlight pulse
+ */
+function animateGoalCardProgress(goalId, previousProgress, newProgress, newlyCompleted) {
+  const cards = document.querySelectorAll(`.goal-card-item[data-goal-id="${goalId}"]`);
+  if (cards.length === 0) {
+    updateGoalsUI();
+    return;
+  }
+
+  cards.forEach(card => {
+    // Animate progress bar fill width
+    const bar = card.querySelector(`[data-goal-bar="${goalId}"]`);
+    if (bar) {
+      bar.style.width = `${newProgress}%`;
+    }
+
+    // Animate percentage text
+    const pctEl = card.querySelector(`[data-goal-pct="${goalId}"]`);
+    if (pctEl) {
+      animateValue(pctEl, previousProgress, newProgress, 750, v => `${Math.round(v)}% Achieved`);
+      if (newProgress >= 100) {
+        pctEl.style.color = "var(--primary)";
+      }
+    }
+
+    // Card highlight pulse animation
+    card.classList.remove("card-updated-pulse");
+    void card.offsetWidth; // force reflow
+    card.classList.add("card-updated-pulse");
+  });
+
+  if (newlyCompleted) {
+    launchConfetti();
+    setTimeout(() => {
+      updateGoalsUI();
+      updateDashboardUI();
+    }, 800);
+  } else {
+    setTimeout(() => {
+      updateGoalsUI();
+    }, 750);
+  }
 }
 
 function updateGoalsUI() {
@@ -407,6 +639,17 @@ function updateGoalsUI() {
   });
 }
 
+function updateGoalChipsActiveState(selectedInc) {
+  document.querySelectorAll("#goalProgressModal .chip-btn[data-inc]").forEach(chip => {
+    const inc = parseInt(chip.getAttribute("data-inc"), 10);
+    if (inc === Number(selectedInc)) {
+      chip.classList.add("active");
+    } else {
+      chip.classList.remove("active");
+    }
+  });
+}
+
 function openGoalProgressModal(goalId) {
   const state = store.getState();
   const goal = state.goals.find(g => g.id === goalId);
@@ -422,6 +665,9 @@ function openGoalProgressModal(goalId) {
   const curPctEl = document.getElementById("goalModalCurrentPct");
   const statusBadge = document.getElementById("goalModalStatusBadge");
   const incInput = document.getElementById("goalIncrementInput");
+  const currentBar = document.getElementById("goalModalCurrentBar");
+  const incBar = document.getElementById("goalModalIncBar");
+  const previewTrack = document.getElementById("goalModalPreviewTrack");
 
   if (targetIdInput) targetIdInput.value = goal.id;
   if (titleEl) titleEl.textContent = goal.title;
@@ -429,31 +675,77 @@ function openGoalProgressModal(goalId) {
   if (targetKgEl) targetKgEl.textContent = `${goal.targetCo2eReductionKg} kg`;
   if (curPctEl) curPctEl.textContent = `${goal.currentProgressPercent}%`;
 
+  if (previewTrack) previewTrack.classList.remove("fusing");
+
   if (statusBadge) {
     statusBadge.className = `badge badge-${goal.status.replace("_", "-")}`;
     statusBadge.textContent = goal.status === "completed" ? "Completed" : goal.status === "not_started" ? "Not Started" : "In Progress";
   }
 
-  const defaultInc = goal.currentProgressPercent === 0 ? 25 : 15;
+  const defaultInc = goal.currentProgressPercent === 0 ? 25 : Math.min(20, Math.max(10, 100 - goal.currentProgressPercent));
   if (incInput) incInput.value = String(defaultInc);
 
-  updateGoalModalPreview(goal.currentProgressPercent, defaultInc);
+  // Initialize bars at 0 for an elegant sliding entrance
+  if (currentBar) currentBar.style.width = "0%";
+  if (incBar) {
+    incBar.style.left = "0%";
+    incBar.style.width = "0%";
+    incBar.classList.remove("complete");
+  }
 
+  updateGoalChipsActiveState(defaultInc);
+  modal.classList.remove("modal-closing");
   modal.classList.add("open");
+
+  // Entrance sequence: base progress slides in first, then increment bar blossoms
+  requestAnimationFrame(() => {
+    if (currentBar) currentBar.style.width = `${goal.currentProgressPercent}%`;
+    setTimeout(() => {
+      updateGoalModalPreview(goal.currentProgressPercent, defaultInc);
+    }, 120);
+  });
 }
 
 function closeGoalProgressModal() {
   const modal = document.getElementById("goalProgressModal");
-  if (modal) modal.classList.remove("open");
+  if (!modal) return;
+  closeModalSmooth(modal);
 }
 
 function updateGoalModalPreview(currentPct, increment) {
-  const newPct = Math.min(100, Math.max(0, Number(currentPct) + Number(increment)));
-  const previewBar = document.getElementById("goalModalPreviewBar");
+  const numCurrent = Number(currentPct) || 0;
+  const numInc = Math.max(0, Number(increment) || 0);
+  const newPct = Math.min(100, numCurrent + numInc);
+  const effectiveInc = Math.max(0, newPct - numCurrent);
+
+  const currentBar = document.getElementById("goalModalCurrentBar");
+  const incBar = document.getElementById("goalModalIncBar");
   const projectedText = document.getElementById("goalModalProjectedPct");
-  if (previewBar) previewBar.style.width = `${newPct}%`;
+  const incBadge = document.getElementById("goalModalIncBadge");
+
+  if (currentBar) currentBar.style.width = `${numCurrent}%`;
+  if (incBar) {
+    incBar.style.left = `${numCurrent}%`;
+    incBar.style.width = `${effectiveInc}%`;
+    if (newPct >= 100) {
+      incBar.classList.add("complete");
+    } else {
+      incBar.classList.remove("complete");
+    }
+  }
+
+  if (incBadge) {
+    incBadge.textContent = `+${effectiveInc}%`;
+    incBadge.className = newPct >= 100 ? "badge badge-completed" : "badge badge-info";
+    incBadge.classList.remove("bounce-pop");
+    void incBadge.offsetWidth;
+    incBadge.classList.add("bounce-pop");
+  }
+
   if (projectedText) {
-    projectedText.textContent = `New: ${newPct}% ${newPct >= 100 ? '(Goal Complete! 🎯)' : ''}`;
+    const prevPct = parseInt(projectedText.getAttribute("data-pct") || String(numCurrent), 10);
+    animateValue(projectedText, prevPct, newPct, 500, v => `New: ${Math.round(v)}% ${v >= 100 ? '(Goal Complete! 🎯)' : ''}`);
+    projectedText.setAttribute("data-pct", String(newPct));
     projectedText.style.color = newPct >= 100 ? 'var(--primary)' : 'var(--info)';
   }
 }
@@ -476,11 +768,12 @@ function setupGoalProgressModal() {
   }
 
   // Quick Chips
-  document.querySelectorAll(".chip-btn[data-inc]").forEach(chip => {
+  document.querySelectorAll("#goalProgressModal .chip-btn[data-inc]").forEach(chip => {
     chip.addEventListener("click", () => {
       const inc = parseInt(chip.getAttribute("data-inc"), 10);
       if (incInput && !isNaN(inc)) {
         incInput.value = String(inc);
+        updateGoalChipsActiveState(inc);
         const goalId = document.getElementById("goalModalTargetId").value;
         const goal = store.getState().goals.find(g => g.id === goalId);
         if (goal) updateGoalModalPreview(goal.currentProgressPercent, inc);
@@ -495,6 +788,7 @@ function setupGoalProgressModal() {
       if (goal && incInput) {
         const remaining = Math.max(0, 100 - goal.currentProgressPercent);
         incInput.value = String(remaining);
+        updateGoalChipsActiveState(-1);
         updateGoalModalPreview(goal.currentProgressPercent, remaining);
       }
     });
@@ -505,11 +799,12 @@ function setupGoalProgressModal() {
       const goalId = document.getElementById("goalModalTargetId").value;
       const goal = store.getState().goals.find(g => g.id === goalId);
       const inc = parseFloat(incInput.value) || 0;
+      updateGoalChipsActiveState(inc);
       if (goal) updateGoalModalPreview(goal.currentProgressPercent, inc);
     });
   }
 
-  // Form Submit
+  // Form Submit with visual fusion animation & smooth card update
   if (form) {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -521,16 +816,37 @@ function setupGoalProgressModal() {
         return;
       }
 
-      const res = store.addGoalProgress(goalId, increment);
-      if (res) {
-        if (res.newlyCompleted) {
-          showToast(`🎉 Congratulations! Goal "${res.goal.title}" reached 100%! +100 eco-points awarded!`, "success");
-          evaluateAchievements();
-        } else {
-          showToast(`Progress logged! "${res.goal.title}" is now at ${res.goal.currentProgressPercent}%.`, "success");
-        }
-        closeGoalProgressModal();
+      // 1. Play visual fusion animation in preview bar
+      const previewTrack = document.getElementById("goalModalPreviewTrack");
+      if (previewTrack) previewTrack.classList.add("fusing");
+
+      const submitBtn = document.getElementById("btnSubmitGoalProgress");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `✓ Saving...`;
       }
+
+      setTimeout(() => {
+        const res = store.addGoalProgress(goalId, increment);
+        if (res) {
+          closeGoalProgressModal();
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `Save Progress`;
+          }
+
+          if (res.newlyCompleted) {
+            showToast(`🎉 Congratulations! Goal "${res.goal.title}" reached 100%! +100 eco-points awarded!`, "success");
+            evaluateAchievements();
+          } else {
+            showToast(`Progress logged! "${res.goal.title}" is now at ${res.goal.currentProgressPercent}%.`, "success");
+          }
+
+          // Smoothly animate the target goal card in dashboard & goals view
+          animateGoalCardProgress(goalId, res.previousProgress, res.goal.currentProgressPercent, res.newlyCompleted);
+          updateDashboardUI();
+        }
+      }, 300);
     });
   }
 
@@ -548,6 +864,54 @@ function setupGoalProgressModal() {
 // ==========================================================================
 // Challenge Progress Management Modal
 // ==========================================================================
+function updateChallengeChipsActiveState(selectedInc) {
+  document.querySelectorAll("#challengeProgressModal .chip-btn.challenge-quick-chip").forEach(chip => {
+    const inc = parseInt(chip.getAttribute("data-inc"), 10);
+    if (inc === Number(selectedInc)) {
+      chip.classList.add("active");
+    } else {
+      chip.classList.remove("active");
+    }
+  });
+}
+
+/**
+ * Smooth in-place challenge card progress animator
+ */
+function animateChallengeCardProgress(challengeId, prevProgress, newProgress, target, completedNow, triggerElement) {
+  const cards = document.querySelectorAll(`.challenge-card[data-challenge-id="${challengeId}"]`);
+  const prevPct = Math.min(100, Math.round(((prevProgress || 0) / target) * 100));
+  const newPct = Math.min(100, Math.round(((newProgress || 0) / target) * 100));
+
+  if (triggerElement) {
+    spawnFloatingStepBubble(triggerElement, `+${Math.max(1, newProgress - prevProgress)} Step`);
+  }
+
+  cards.forEach(card => {
+    const bar = card.querySelector(`[data-challenge-bar="${challengeId}"]`);
+    if (bar) {
+      bar.style.width = `${newPct}%`;
+    }
+
+    const textEl = card.querySelector(`[data-challenge-text="${challengeId}"]`);
+    if (textEl) {
+      textEl.innerHTML = `Progress: <strong>${newProgress} / ${target}</strong> (${newPct}%)`;
+    }
+
+    card.classList.remove("card-updated-pulse");
+    void card.offsetWidth;
+    card.classList.add("card-updated-pulse");
+  });
+
+  if (completedNow) {
+    launchConfetti();
+    setTimeout(() => {
+      updateGamificationUI();
+      updateDashboardUI();
+    }, 800);
+  }
+}
+
 function openChallengeProgressModal(challengeId) {
   const state = store.getState();
   const challenge = state.challenges.find(c => c.id === challengeId);
@@ -565,6 +929,9 @@ function openChallengeProgressModal(challengeId) {
   const curProgressEl = document.getElementById("challengeModalCurrentProgress");
   const targetNumEl = document.getElementById("challengeModalTargetNum");
   const incInput = document.getElementById("challengeIncrementInput");
+  const currentBar = document.getElementById("challengeModalCurrentBar");
+  const incBar = document.getElementById("challengeModalIncBar");
+  const previewTrack = document.getElementById("challengeModalPreviewTrack");
 
   if (targetIdInput) targetIdInput.value = challenge.id;
   if (nameEl) nameEl.textContent = challenge.title;
@@ -581,37 +948,86 @@ function openChallengeProgressModal(challengeId) {
   if (curProgressEl) curProgressEl.textContent = `${challenge.progress || 0} / ${challenge.target}`;
   if (targetNumEl) targetNumEl.textContent = String(challenge.target);
 
+  if (previewTrack) previewTrack.classList.remove("fusing");
+
   const remaining = Math.max(1, challenge.target - (challenge.progress || 0));
   if (incInput) {
     incInput.value = "1";
     incInput.max = String(remaining);
   }
 
-  updateChallengeModalPreview(challenge.progress || 0, challenge.target, 1);
+  // Initialize bars at 0 for smooth entrance
+  if (currentBar) currentBar.style.width = "0%";
+  if (incBar) {
+    incBar.style.left = "0%";
+    incBar.style.width = "0%";
+    incBar.classList.remove("complete");
+  }
+
+  updateChallengeChipsActiveState(1);
+  modal.classList.remove("modal-closing");
   modal.classList.add("open");
+
+  const curPct = Math.min(100, Math.round(((challenge.progress || 0) / challenge.target) * 100));
+  requestAnimationFrame(() => {
+    if (currentBar) currentBar.style.width = `${curPct}%`;
+    setTimeout(() => {
+      updateChallengeModalPreview(challenge.progress || 0, challenge.target, 1);
+    }, 120);
+  });
 }
 
 function closeChallengeProgressModal() {
   const modal = document.getElementById("challengeProgressModal");
-  if (modal) modal.classList.remove("open");
+  if (!modal) return;
+  closeModalSmooth(modal);
 }
 
 function updateChallengeModalPreview(currentProgress, target, increment) {
-  const inc = Math.max(0, Number(increment) || 0);
-  const newProgress = Math.min(target, currentProgress + inc);
-  const pct = Math.min(100, Math.round((newProgress / target) * 100));
-  const previewBar = document.getElementById("challengeModalPreviewBar");
-  const projectedText = document.getElementById("challengeModalProjectedProgress");
+  const numCurrent = Math.max(0, Number(currentProgress) || 0);
+  const numTarget = Math.max(1, Number(target) || 1);
+  const numInc = Math.max(0, Number(increment) || 0);
 
-  if (previewBar) previewBar.style.width = `${pct}%`;
-  if (projectedText) {
-    if (newProgress >= target) {
-      projectedText.textContent = `New: ${newProgress} / ${target} (Complete! 🎉)`;
-      projectedText.style.color = "var(--primary)";
+  const newProgress = Math.min(numTarget, numCurrent + numInc);
+  const curPct = Math.min(100, Math.round((numCurrent / numTarget) * 100));
+  const newPct = Math.min(100, Math.round((newProgress / numTarget) * 100));
+  const incPct = Math.max(0, newPct - curPct);
+
+  const currentBar = document.getElementById("challengeModalCurrentBar");
+  const incBar = document.getElementById("challengeModalIncBar");
+  const projectedText = document.getElementById("challengeModalProjectedProgress");
+  const incBadge = document.getElementById("challengeModalIncBadge");
+
+  if (currentBar) currentBar.style.width = `${curPct}%`;
+  if (incBar) {
+    incBar.style.left = `${curPct}%`;
+    incBar.style.width = `${incPct}%`;
+    if (newProgress >= numTarget) {
+      incBar.classList.add("complete");
     } else {
-      projectedText.textContent = `New: ${newProgress} / ${target} (${pct}%)`;
-      projectedText.style.color = "var(--info)";
+      incBar.classList.remove("complete");
     }
+  }
+
+  if (incBadge) {
+    incBadge.textContent = `+${numInc} ${numInc === 1 ? 'step' : 'steps'}`;
+    incBadge.className = newProgress >= numTarget ? "badge badge-completed" : "badge badge-info";
+    incBadge.classList.remove("bounce-pop");
+    void incBadge.offsetWidth;
+    incBadge.classList.add("bounce-pop");
+  }
+
+  if (projectedText) {
+    const prevProg = parseInt(projectedText.getAttribute("data-prog") || String(numCurrent), 10);
+    animateValue(projectedText, prevProg, newProgress, 500, v => {
+      const roundV = Math.round(v);
+      const roundPct = Math.min(100, Math.round((roundV / numTarget) * 100));
+      return roundV >= numTarget
+        ? `New: ${roundV} / ${numTarget} (Complete! 🎉)`
+        : `New: ${roundV} / ${numTarget} (${roundPct}%)`;
+    });
+    projectedText.setAttribute("data-prog", String(newProgress));
+    projectedText.style.color = newProgress >= numTarget ? "var(--primary)" : "var(--info)";
   }
 }
 
@@ -638,6 +1054,7 @@ function setupChallengeProgressModal() {
       const inc = parseInt(chip.getAttribute("data-inc"), 10);
       if (incInput && !isNaN(inc)) {
         incInput.value = String(inc);
+        updateChallengeChipsActiveState(inc);
         const challengeId = document.getElementById("challengeModalTargetId")?.value;
         const challenge = store.getState().challenges.find(c => c.id === challengeId);
         if (challenge) {
@@ -654,6 +1071,7 @@ function setupChallengeProgressModal() {
       if (challenge && incInput) {
         const remaining = Math.max(1, challenge.target - (challenge.progress || 0));
         incInput.value = String(remaining);
+        updateChallengeChipsActiveState(-1);
         updateChallengeModalPreview(challenge.progress || 0, challenge.target, remaining);
       }
     });
@@ -665,6 +1083,7 @@ function setupChallengeProgressModal() {
       const challenge = store.getState().challenges.find(c => c.id === challengeId);
       if (challenge) {
         const inc = Math.max(0, parseInt(incInput.value, 10) || 0);
+        updateChallengeChipsActiveState(inc);
         updateChallengeModalPreview(challenge.progress || 0, challenge.target, inc);
       }
     });
@@ -677,17 +1096,40 @@ function setupChallengeProgressModal() {
       const inc = Math.max(1, parseInt(incInput?.value, 10) || 1);
 
       if (challengeId) {
-        const res = store.addChallengeProgress(challengeId, inc);
-        closeChallengeProgressModal();
-        if (res) {
-          if (res.completedNow) {
-            showToast(`🎉 Challenge completed: "${res.challenge.title}"! +${res.challenge.points} points awarded! 🏆`, "success");
-            evaluateAchievements();
-          } else {
-            showToast(`📈 Progress updated for "${res.challenge.title}": ${res.challenge.progress}/${res.challenge.target}`, "info");
-          }
-          updateGamificationUI();
+        const previewTrack = document.getElementById("challengeModalPreviewTrack");
+        if (previewTrack) previewTrack.classList.add("fusing");
+
+        const submitBtn = document.getElementById("btnSubmitChallengeProgress");
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `✓ Saving...`;
         }
+
+        setTimeout(() => {
+          const state = store.getState();
+          const challenge = state.challenges.find(c => c.id === challengeId);
+          const prevProgress = challenge ? challenge.progress || 0 : 0;
+          const target = challenge ? challenge.target : 5;
+
+          const res = store.addChallengeProgress(challengeId, inc);
+          closeChallengeProgressModal();
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `Save Progress`;
+          }
+
+          if (res) {
+            if (res.completedNow) {
+              showToast(`🎉 Challenge completed: "${res.challenge.title}"! +${res.challenge.points} points awarded! 🏆`, "success");
+              evaluateAchievements();
+            } else {
+              showToast(`📈 Progress updated for "${res.challenge.title}": ${res.challenge.progress}/${res.challenge.target}`, "info");
+            }
+
+            animateChallengeCardProgress(challengeId, prevProgress, res.challenge.progress, target, res.completedNow);
+            updateDashboardUI();
+          }
+        }, 300);
       }
     });
   }
@@ -766,13 +1208,14 @@ function openNewProfileModal() {
     const emailInput = document.getElementById("createUserEmail");
     if (nameInput) nameInput.value = user.name === "Alex Rivera" ? "" : (user.name || "");
     if (emailInput) emailInput.value = user.email === "alex.rivera@example.com" ? "" : (user.email || "");
+    modal.classList.remove("modal-closing");
     modal.classList.add("open");
   }
 }
 
 function closeNewProfileModal() {
   const modal = document.getElementById("newProfileModal");
-  if (modal) modal.classList.remove("open");
+  if (modal) closeModalSmooth(modal);
 }
 
 function setupProfileHandlers() {
@@ -951,7 +1394,10 @@ function setupActivityForm() {
 // Modal Toggle
 export function openActivityModal() {
   const modal = document.getElementById("logActivityModal");
-  if (modal) modal.classList.add("open");
+  if (modal) {
+    modal.classList.remove("modal-closing");
+    modal.classList.add("open");
+  }
   const dateInput = document.getElementById("activityDateInput");
   if (dateInput && !dateInput.value) {
     dateInput.value = new Date().toISOString().split("T")[0];
@@ -960,7 +1406,7 @@ export function openActivityModal() {
 
 export function closeActivityModal() {
   const modal = document.getElementById("logActivityModal");
-  if (modal) modal.classList.remove("open");
+  if (modal) closeModalSmooth(modal);
 }
 
 // ==========================================================================
@@ -1046,12 +1492,13 @@ async function loadAICoachRecommendations(promptTopic = null) {
 
         if (res.success) {
           btn.classList.remove("btn-primary");
-          btn.classList.add("btn-secondary", "adopted");
+          btn.classList.add("btn-secondary", "adopted", "bounce-pop");
           btn.disabled = true;
           btn.style.opacity = "0.8";
           btn.style.cursor = "default";
           btn.textContent = "✓ Goal Adopted";
 
+          spawnFloatingStepBubble(btn, "🎯 Goal Adopted!");
           showToast(`🎯 Adopted "${rec.title}"! Added to your Goals as "Not Started".`, "success");
           updateGoalsUI();
         } else if (res.reason === "already_exists") {
@@ -1315,6 +1762,11 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const id = quickStepBtn.getAttribute("data-id");
       if (id) {
+        const state = store.getState();
+        const ch = state.challenges.find(c => c.id === id);
+        const prevProg = ch ? ch.progress || 0 : 0;
+        const target = ch ? ch.target : 5;
+
         const res = store.addChallengeProgress(id, 1);
         if (res) {
           if (res.completedNow) {
@@ -1323,7 +1775,8 @@ document.addEventListener("DOMContentLoaded", () => {
           } else {
             showToast(`📈 Progress added to "${res.challenge.title}": ${res.challenge.progress}/${res.challenge.target}`, "info");
           }
-          updateGamificationUI();
+          animateChallengeCardProgress(id, prevProg, res.challenge.progress, target, res.completedNow, quickStepBtn);
+          updateDashboardUI();
         }
       }
       return;

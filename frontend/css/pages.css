@@ -231,27 +231,164 @@
 }
 
 .progress-track {
-  height: 8px;
+  height: 9px;
   width: 100%;
   background: #e2e8f0;
   border-radius: var(--radius-full);
   overflow: hidden;
-  margin: 0.25rem 0;
+  position: relative;
+  margin: 0.35rem 0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .progress-track {
+  background: #27272a;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .progress-bar-fill {
   height: 100%;
   background: var(--accent-gradient);
   border-radius: var(--radius-full);
-  transition: width 0.6s ease-in-out;
+  transition: width 0.75s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
+}
+
+/* Glossy gleam light beam travelling across all progress bars */
+.progress-bar-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 60px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 100%
+  );
+  animation: progressGleam 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
 }
 
 .goal-card-item.status-completed .progress-bar-fill {
   background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
 .goal-card-item.status-not_started .progress-bar-fill {
   background: #cbd5e1;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .goal-card-item.status-not_started .progress-bar-fill {
+  background: #3f3f46;
+}
+
+/* ==========================================================================
+   Dual-Layer Modal Progress Preview Track (Base Progress + Added Increment)
+   ========================================================================== */
+.progress-track-preview {
+  height: 16px;
+  width: 100%;
+  background: #e2e8f0;
+  border-radius: var(--radius-full);
+  position: relative;
+  overflow: hidden;
+  margin: 0.5rem 0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .progress-track-preview {
+  background: #27272a;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Base / Current Progress Segment */
+.progress-bar-base {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
+}
+
+/* Added Increment Segment */
+.progress-bar-increment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    #2563eb,
+    #2563eb 8px,
+    #60a5fa 8px,
+    #60a5fa 16px
+  );
+  background-size: 32px 32px;
+  animation: stripeMove 1.2s linear infinite;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+  transition: left 0.7s cubic-bezier(0.16, 1, 0.3, 1), width 0.7s cubic-bezier(0.16, 1, 0.3, 1), background 0.35s ease;
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
+  z-index: 2;
+}
+
+/* When increment fills to 100%, switch to triumphant emerald */
+.progress-bar-increment.complete {
+  background: repeating-linear-gradient(
+    -45deg,
+    #059669,
+    #059669 8px,
+    #34d399 8px,
+    #34d399 16px
+  );
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
+}
+
+/* Fusion animation when progress is saved */
+.progress-track-preview.fusing .progress-bar-increment {
+  animation: none;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.9);
+  transition: all 0.35s ease;
+}
+
+/* Floating step bubble animation (+1 Step) */
+.floating-step-bubble {
+  position: absolute;
+  pointer-events: none;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #059669, #10b981);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+  animation: floatUpFade 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 100;
+  white-space: nowrap;
+}
+
+/* Card update celebratory highlight pulse */
+.goal-card-item.card-updated-pulse,
+.challenge-card.card-updated-pulse {
+  animation: cardUpdatedPulse 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+/* Canvas Confetti */
+.confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
 }
 
 .goal-footer {

@@ -68,8 +68,10 @@
   --radius-full: 9999px;
 
   /* Transitions */
-  --trans-fast: 0.15s ease;
-  --trans-normal: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --trans-fast: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  --trans-normal: 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  --trans-smooth: 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  --trans-spring: 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
   --trans-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Layout Dimensions */
@@ -801,22 +803,137 @@ button, input, select, textarea {
 /* Page View Management (SPA tabs) */
 .page-view {
   display: none;
-  animation: fadeIn 0.25s ease forwards;
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 .page-view.active {
   display: block;
+  opacity: 1;
+  transform: translateY(0);
+  animation: pageViewEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes fadeIn {
+@keyframes pageViewEntrance {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ==========================================================================
+   Motion System & Keyframe Library
+   ========================================================================== */
+
+/* Shimmering gleam light sweep across progress bars */
+@keyframes progressGleam {
+  0% {
+    transform: translateX(-100%) skewX(-20deg);
+  }
+  50%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+/* Continuous animated diagonal stripes for newly added progress segment */
+@keyframes stripeMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 32px 0;
+  }
+}
+
+/* Glowing breathing pulse for active elements and rings */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+}
+
+/* Tactile bouncy spring pop for active button / chip / badge state */
+@keyframes bouncePop {
+  0% {
+    transform: scale(0.92);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Card highlight pulse when progress is updated */
+@keyframes cardUpdatedPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+    border-color: #10b981;
+  }
+  30% {
+    transform: scale(1.015) translateY(-2px);
+    box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.35), 0 0 0 4px rgba(16, 185, 129, 0.2);
+    border-color: #10b981;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--border);
+  }
+}
+
+/* Floating step bubble animation (+1 Step) */
+@keyframes floatUpFade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.7);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -14px) scale(1.1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -32px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -46px) scale(0.85);
+  }
+}
+
+/* Points Pill bounce animation */
+@keyframes pointsBump {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.25);
+    color: #10b981;
+  }
+  65% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.bounce-pop {
+  animation: bouncePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.points-bump {
+  animation: pointsBump 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* Responsive Breakpoints */
