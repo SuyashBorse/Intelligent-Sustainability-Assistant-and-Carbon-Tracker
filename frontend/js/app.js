@@ -665,17 +665,13 @@ function openGoalProgressModal(goalId) {
   const curPctEl = document.getElementById("goalModalCurrentPct");
   const statusBadge = document.getElementById("goalModalStatusBadge");
   const incInput = document.getElementById("goalIncrementInput");
-  const currentBar = document.getElementById("goalModalCurrentBar");
-  const incBar = document.getElementById("goalModalIncBar");
-  const previewTrack = document.getElementById("goalModalPreviewTrack");
+  const previewBar = document.getElementById("goalModalPreviewBar");
 
   if (targetIdInput) targetIdInput.value = goal.id;
   if (titleEl) titleEl.textContent = goal.title;
   if (descEl) descEl.textContent = goal.description;
   if (targetKgEl) targetKgEl.textContent = `${goal.targetCo2eReductionKg} kg`;
   if (curPctEl) curPctEl.textContent = `${goal.currentProgressPercent}%`;
-
-  if (previewTrack) previewTrack.classList.remove("fusing");
 
   if (statusBadge) {
     statusBadge.className = `badge badge-${goal.status.replace("_", "-")}`;
@@ -685,24 +681,24 @@ function openGoalProgressModal(goalId) {
   const defaultInc = goal.currentProgressPercent === 0 ? 25 : Math.min(20, Math.max(10, 100 - goal.currentProgressPercent));
   if (incInput) incInput.value = String(defaultInc);
 
-  // Initialize bars at 0 for an elegant sliding entrance
-  if (currentBar) currentBar.style.width = "0%";
-  if (incBar) {
-    incBar.style.left = "0%";
-    incBar.style.width = "0%";
-    incBar.classList.remove("complete");
+  // Set initial bar width at current progress without transition, then smoothly slide forward
+  if (previewBar) {
+    previewBar.style.transition = "none";
+    previewBar.style.width = `${goal.currentProgressPercent}%`;
   }
 
   updateGoalChipsActiveState(defaultInc);
   modal.classList.remove("modal-closing");
   modal.classList.add("open");
 
-  // Entrance sequence: base progress slides in first, then increment bar blossoms
+  // Smooth forward glide animation
   requestAnimationFrame(() => {
-    if (currentBar) currentBar.style.width = `${goal.currentProgressPercent}%`;
-    setTimeout(() => {
+    requestAnimationFrame(() => {
+      if (previewBar) {
+        previewBar.style.transition = "width 0.65s cubic-bezier(0.16, 1, 0.3, 1)";
+      }
       updateGoalModalPreview(goal.currentProgressPercent, defaultInc);
-    }, 120);
+    });
   });
 }
 
@@ -718,20 +714,12 @@ function updateGoalModalPreview(currentPct, increment) {
   const newPct = Math.min(100, numCurrent + numInc);
   const effectiveInc = Math.max(0, newPct - numCurrent);
 
-  const currentBar = document.getElementById("goalModalCurrentBar");
-  const incBar = document.getElementById("goalModalIncBar");
+  const previewBar = document.getElementById("goalModalPreviewBar");
   const projectedText = document.getElementById("goalModalProjectedPct");
   const incBadge = document.getElementById("goalModalIncBadge");
 
-  if (currentBar) currentBar.style.width = `${numCurrent}%`;
-  if (incBar) {
-    incBar.style.left = `${numCurrent}%`;
-    incBar.style.width = `${effectiveInc}%`;
-    if (newPct >= 100) {
-      incBar.classList.add("complete");
-    } else {
-      incBar.classList.remove("complete");
-    }
+  if (previewBar) {
+    previewBar.style.width = `${newPct}%`;
   }
 
   if (incBadge) {
@@ -746,7 +734,7 @@ function updateGoalModalPreview(currentPct, increment) {
     const prevPct = parseInt(projectedText.getAttribute("data-pct") || String(numCurrent), 10);
     animateValue(projectedText, prevPct, newPct, 500, v => `New: ${Math.round(v)}% ${v >= 100 ? '(Goal Complete! 🎯)' : ''}`);
     projectedText.setAttribute("data-pct", String(newPct));
-    projectedText.style.color = newPct >= 100 ? 'var(--primary)' : 'var(--info)';
+    projectedText.style.color = newPct >= 100 ? 'var(--primary)' : 'var(--text-main)';
   }
 }
 
@@ -816,10 +804,6 @@ function setupGoalProgressModal() {
         return;
       }
 
-      // 1. Play visual fusion animation in preview bar
-      const previewTrack = document.getElementById("goalModalPreviewTrack");
-      if (previewTrack) previewTrack.classList.add("fusing");
-
       const submitBtn = document.getElementById("btnSubmitGoalProgress");
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -846,7 +830,7 @@ function setupGoalProgressModal() {
           animateGoalCardProgress(goalId, res.previousProgress, res.goal.currentProgressPercent, res.newlyCompleted);
           updateDashboardUI();
         }
-      }, 300);
+      }, 200);
     });
   }
 
@@ -929,9 +913,7 @@ function openChallengeProgressModal(challengeId) {
   const curProgressEl = document.getElementById("challengeModalCurrentProgress");
   const targetNumEl = document.getElementById("challengeModalTargetNum");
   const incInput = document.getElementById("challengeIncrementInput");
-  const currentBar = document.getElementById("challengeModalCurrentBar");
-  const incBar = document.getElementById("challengeModalIncBar");
-  const previewTrack = document.getElementById("challengeModalPreviewTrack");
+  const previewBar = document.getElementById("challengeModalPreviewBar");
 
   if (targetIdInput) targetIdInput.value = challenge.id;
   if (nameEl) nameEl.textContent = challenge.title;
@@ -948,32 +930,31 @@ function openChallengeProgressModal(challengeId) {
   if (curProgressEl) curProgressEl.textContent = `${challenge.progress || 0} / ${challenge.target}`;
   if (targetNumEl) targetNumEl.textContent = String(challenge.target);
 
-  if (previewTrack) previewTrack.classList.remove("fusing");
-
   const remaining = Math.max(1, challenge.target - (challenge.progress || 0));
   if (incInput) {
     incInput.value = "1";
     incInput.max = String(remaining);
   }
 
-  // Initialize bars at 0 for smooth entrance
-  if (currentBar) currentBar.style.width = "0%";
-  if (incBar) {
-    incBar.style.left = "0%";
-    incBar.style.width = "0%";
-    incBar.classList.remove("complete");
+  const curPct = Math.min(100, Math.round(((challenge.progress || 0) / challenge.target) * 100));
+
+  // Set initial bar width at current progress without transition, then smoothly slide forward
+  if (previewBar) {
+    previewBar.style.transition = "none";
+    previewBar.style.width = `${curPct}%`;
   }
 
   updateChallengeChipsActiveState(1);
   modal.classList.remove("modal-closing");
   modal.classList.add("open");
 
-  const curPct = Math.min(100, Math.round(((challenge.progress || 0) / challenge.target) * 100));
   requestAnimationFrame(() => {
-    if (currentBar) currentBar.style.width = `${curPct}%`;
-    setTimeout(() => {
+    requestAnimationFrame(() => {
+      if (previewBar) {
+        previewBar.style.transition = "width 0.65s cubic-bezier(0.16, 1, 0.3, 1)";
+      }
       updateChallengeModalPreview(challenge.progress || 0, challenge.target, 1);
-    }, 120);
+    });
   });
 }
 
@@ -989,24 +970,14 @@ function updateChallengeModalPreview(currentProgress, target, increment) {
   const numInc = Math.max(0, Number(increment) || 0);
 
   const newProgress = Math.min(numTarget, numCurrent + numInc);
-  const curPct = Math.min(100, Math.round((numCurrent / numTarget) * 100));
   const newPct = Math.min(100, Math.round((newProgress / numTarget) * 100));
-  const incPct = Math.max(0, newPct - curPct);
 
-  const currentBar = document.getElementById("challengeModalCurrentBar");
-  const incBar = document.getElementById("challengeModalIncBar");
+  const previewBar = document.getElementById("challengeModalPreviewBar");
   const projectedText = document.getElementById("challengeModalProjectedProgress");
   const incBadge = document.getElementById("challengeModalIncBadge");
 
-  if (currentBar) currentBar.style.width = `${curPct}%`;
-  if (incBar) {
-    incBar.style.left = `${curPct}%`;
-    incBar.style.width = `${incPct}%`;
-    if (newProgress >= numTarget) {
-      incBar.classList.add("complete");
-    } else {
-      incBar.classList.remove("complete");
-    }
+  if (previewBar) {
+    previewBar.style.width = `${newPct}%`;
   }
 
   if (incBadge) {
@@ -1027,7 +998,7 @@ function updateChallengeModalPreview(currentProgress, target, increment) {
         : `New: ${roundV} / ${numTarget} (${roundPct}%)`;
     });
     projectedText.setAttribute("data-prog", String(newProgress));
-    projectedText.style.color = newProgress >= numTarget ? "var(--primary)" : "var(--info)";
+    projectedText.style.color = newProgress >= numTarget ? "var(--primary)" : "var(--text-main)";
   }
 }
 
@@ -1096,9 +1067,6 @@ function setupChallengeProgressModal() {
       const inc = Math.max(1, parseInt(incInput?.value, 10) || 1);
 
       if (challengeId) {
-        const previewTrack = document.getElementById("challengeModalPreviewTrack");
-        if (previewTrack) previewTrack.classList.add("fusing");
-
         const submitBtn = document.getElementById("btnSubmitChallengeProgress");
         if (submitBtn) {
           submitBtn.disabled = true;
@@ -1129,7 +1097,7 @@ function setupChallengeProgressModal() {
             animateChallengeCardProgress(challengeId, prevProgress, res.challenge.progress, target, res.completedNow);
             updateDashboardUI();
           }
-        }, 300);
+        }, 200);
       }
     });
   }
