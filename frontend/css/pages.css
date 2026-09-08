@@ -242,7 +242,7 @@
 }
 
 [data-theme="dark"] .progress-track {
-  background: #27272a;
+  background: var(--surface-hover);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
@@ -303,7 +303,7 @@
 }
 
 [data-theme="dark"] .progress-track-preview {
-  background: #27272a;
+  background: var(--surface-hover);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
@@ -767,9 +767,9 @@
    Dark Mode Page Refinements
    ========================================================================== */
 [data-theme="dark"] .dashboard-banner {
-  background: linear-gradient(135deg, #06381e 0%, #09090b 100%);
+  background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
   border: 1px solid #143522;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 [data-theme="dark"] .goal-card-item {

@@ -737,7 +737,7 @@
    Dark Mode Component Refinements
    ========================================================================== */
 [data-theme="dark"] .score-bg-ring {
-  stroke: #27272a;
+  stroke: var(--surface-hover);
 }
 
 [data-theme="dark"] .modal-box {
