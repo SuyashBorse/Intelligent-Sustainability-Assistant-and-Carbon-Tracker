@@ -561,7 +561,7 @@ class CarbonStore {
     this.state = {
       user: {
         id: "usr_" + Date.now(),
-        name: name || "Eco Advocate",
+        name: name || "",
         email: email || "user@example.com",
         country: country,
         preferredUnit: preferredUnit,

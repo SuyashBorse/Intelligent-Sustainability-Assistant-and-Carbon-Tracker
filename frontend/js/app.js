@@ -1113,14 +1113,24 @@ function getInitials(name) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+function getUserTitle(level) {
+  if (level < 5) return "Eco Sprout";
+  if (level < 10) return "Sustainability Supporter";
+  if (level < 20) return "Climate Champion";
+  if (level < 50) return "Earth Guardian";
+  return "Carbon Master";
+}
+
 function updateUserProfileUI() {
   const state = store.getState();
   const user = state.user || {};
-  const name = user.name || "Eco Advocate";
+  const level = Math.min(100, Math.floor((user.points || 0) / 100) + 1);
+  const userTitle = getUserTitle(level);
+  
+  const name = user.name || userTitle;
   const email = user.email || "user@example.com";
   const initials = getInitials(name);
   const firstName = name.split(" ")[0];
-  const level = Math.min(10, Math.floor((user.points || 0) / 100) + 1);
 
   // Sidebar user footer
   const sbAvatar = document.getElementById("sidebarUserAvatar");
@@ -1128,7 +1138,7 @@ function updateUserProfileUI() {
   const sbRole = document.getElementById("sidebarUserRole");
   if (sbAvatar) sbAvatar.textContent = initials;
   if (sbName) sbName.textContent = name;
-  if (sbRole) sbRole.textContent = `Eco Advocate • Lvl ${level}`;
+  if (sbRole) sbRole.textContent = `${userTitle} • Lvl ${level}`;
 
   // Dashboard greeting
   const dashGreeting = document.getElementById("dashboardGreeting");
@@ -1142,7 +1152,11 @@ function updateUserProfileUI() {
   if (profAvatar) profAvatar.textContent = initials;
   if (profName) profName.textContent = name;
   if (profEmail) profEmail.textContent = email;
-  if (profRole) profRole.textContent = `Eco Advocate • Lvl ${level}`;
+  if (profRole) profRole.textContent = `${userTitle} • Lvl ${level}`;
+
+  // Gamification Hero Title
+  const gamificationHeroTitle = document.getElementById("gamificationHeroTitle");
+  if (gamificationHeroTitle) gamificationHeroTitle.textContent = `Level ${level} ${userTitle}`;
 
   // Profile form inputs
   const nameInput = document.getElementById("profileNameInput");

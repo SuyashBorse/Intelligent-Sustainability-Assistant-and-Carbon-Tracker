@@ -191,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function authenticateAndRedirect(name, email) {
-    const userName = name || "Eco Advocate";
+    const userName = name || "";
     const userEmail = email || "user@example.com";
 
     try {
