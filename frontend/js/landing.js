@@ -2,6 +2,8 @@
  * EcoTrack AI — Landing Page Lightweight Performance Engine
  */
 
+import { store, DEMO_EMAIL } from "./store.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   const header = document.querySelector(".landing-header");
   const navLinks = document.querySelectorAll(".landing-nav-links a");
@@ -191,16 +193,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function authenticateAndRedirect(name, email) {
+    const userEmail = email || DEMO_EMAIL;
     const userName = name || "";
-    const userEmail = email || "user@example.com";
 
     try {
-      localStorage.setItem("ecotrack_current_user", JSON.stringify({
-        name: userName,
-        email: userEmail
-      }));
+      store.switchAccount(userEmail, userName);
     } catch (e) {
-      console.error("Could not save session", e);
+      console.error("Could not switch account session", e);
     }
     window.location.href = "dashboard.html";
   }
@@ -218,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnDemoLogin = document.getElementById("btnModalDemoLogin");
   if (btnDemoLogin) {
     btnDemoLogin.addEventListener("click", () => {
-      authenticateAndRedirect("Alex Rivera", "alex.rivera@example.com");
+      authenticateAndRedirect("Alex Rivera", DEMO_EMAIL);
     });
   }
 

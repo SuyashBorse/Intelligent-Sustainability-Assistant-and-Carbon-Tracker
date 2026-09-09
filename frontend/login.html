@@ -157,36 +157,29 @@
         </button>
       </div>
 
+      <!-- Existing Local Accounts Switcher -->
+      <div id="knownAccountsSection" style="margin-top: 1.25rem; display: none; border-top: 1px dashed var(--border); padding-top: 1rem; text-align: left;">
+        <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+          Or switch to an existing account on this device:
+        </div>
+        <div id="knownAccountsList" style="display: flex; flex-direction: column; gap: 0.4rem;"></div>
+      </div>
+
       <div style="text-align: center; margin-top: 1.5rem; font-size: 0.88rem; color: var(--text-muted);">
         Don't have an account yet? <a href="register.html" style="font-weight: 600;">Sign up for free</a>
       </div>
     </div>
   </div>
 
-  <script>
-    function loginUser(name, email) {
+  <script type="module">
+    import { store, DEMO_EMAIL } from "./js/store.js";
+
+    function performLogin(name, email) {
       try {
-        const userName = name || "";
-        const userEmail = email || "user@example.com";
-
-        localStorage.setItem("ecotrack_current_user", JSON.stringify({
-          name: userName,
-          email: userEmail
-        }));
-
-        let state = null;
-        const stored = localStorage.getItem("carbon_tracker_state_v1") || localStorage.getItem("ecotrack_state_v1");
-        if (stored) {
-          try { state = JSON.parse(stored); } catch (e) {}
-        }
-
-        if (state && state.user) {
-          state.user.name = userName;
-          state.user.email = userEmail;
-          localStorage.setItem("carbon_tracker_state_v1", JSON.stringify(state));
-          localStorage.setItem("ecotrack_state_v1", JSON.stringify(state));
-        }
-      } catch (err) {}
+        store.switchAccount(email, name);
+      } catch (err) {
+        console.error("Login failed:", err);
+      }
       window.location.href = 'dashboard.html';
     }
 
@@ -195,22 +188,50 @@
       const email = document.getElementById('loginEmail').value.trim();
       const prefix = email.split('@')[0].replace(/[._-]/g, ' ');
       const name = prefix.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      loginUser(name, email);
+      performLogin(name, email);
     });
 
     document.getElementById('btnUseDemoAccount').addEventListener('click', function() {
-      loginUser("Alex Rivera", "alex.rivera@example.com");
+      performLogin("Alex Rivera", DEMO_EMAIL);
     });
 
     document.getElementById('btnGoogleSignIn').addEventListener('click', function() {
       const name = prompt("Enter your name for your Google EcoTrack profile:", "Suyash Borse");
       if (name) {
         const email = name.toLowerCase().replace(/\s+/g, ".") + "@gmail.com";
-        loginUser(name, email);
-      } else {
-        window.location.href = "dashboard.html";
+        performLogin(name, email);
       }
     });
+
+    // Populate registered accounts if any exist on this device
+    try {
+      const accounts = store.getRegisteredAccounts();
+      const listEl = document.getElementById("knownAccountsList");
+      const sectionEl = document.getElementById("knownAccountsSection");
+      if (accounts && accounts.length > 0 && listEl && sectionEl) {
+        sectionEl.style.display = "block";
+        listEl.innerHTML = accounts.map(acc => `
+          <button type="button" class="btn btn-secondary btn-sm account-chip-btn" data-email="${acc.email}" data-name="${acc.name}" style="display: flex; align-items: center; justify-content: space-between; width: 100%; text-align: left; padding: 0.45rem 0.75rem; font-size: 0.82rem;">
+            <span>
+              <strong>${acc.name}</strong> <span style="color: var(--text-muted); font-size: 0.76rem;">(${acc.email})</span>
+            </span>
+            <span class="badge ${acc.isDemo ? 'badge-info' : 'badge-completed'}" style="font-size: 0.68rem; padding: 0.15rem 0.4rem;">
+              ${acc.isDemo ? 'Demo User' : 'Personal'}
+            </span>
+          </button>
+        `).join("");
+
+        listEl.querySelectorAll(".account-chip-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const email = btn.getAttribute("data-email");
+            const name = btn.getAttribute("data-name");
+            performLogin(name, email);
+          });
+        });
+      }
+    } catch (err) {
+      console.warn("Could not load known accounts", err);
+    }
 
     // Theme Toggle Handler
     (function() {

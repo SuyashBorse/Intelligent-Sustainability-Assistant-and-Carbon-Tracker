@@ -7,12 +7,202 @@
 import { calculateEmission } from "./calculator.js";
 
 const STORAGE_KEY = "carbon_tracker_state_v1";
+const ACTIVE_EMAIL_KEY = "ecotrack_active_email";
+const REGISTRY_KEY = "ecotrack_accounts_registry";
+export const DEMO_EMAIL = "alex.rivera@example.com";
 
 // Helper for generating recent dates
 function getPastDate(daysAgo) {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
   return d.toISOString().split("T")[0];
+}
+
+// Helper for generating future dates
+function getFutureDate(daysAhead) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysAhead);
+  return d.toISOString().split("T")[0];
+}
+
+export function normalizeEmail(email) {
+  return (email || "").trim().toLowerCase();
+}
+
+export function getAccountStorageKey(email) {
+  const norm = normalizeEmail(email) || DEMO_EMAIL;
+  return `ecotrack_account_${norm}`;
+}
+
+/**
+ * Generate fresh, meaningful starter goals at 0% progress for a new user account
+ */
+export function getStarterGoals(reductionTarget = 20) {
+  const targetPct = Number(reductionTarget) || 20;
+  return [
+    {
+      id: "goal_" + Date.now() + "_1",
+      title: "Cut Personal Commute Emissions",
+      description: "Replace 2 weekly solo car commutes with cycling, train, bus, or carpooling.",
+      targetCo2eReductionKg: Math.round(20 * (targetPct / 20)),
+      currentProgressPercent: 0,
+      targetDate: getFutureDate(30),
+      status: "not_started",
+      category: "transportation",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "goal_" + Date.now() + "_2",
+      title: "Home Energy Conservation",
+      description: "Lower grid electricity consumption through smart thermostat scheduling and phantom load reduction.",
+      targetCo2eReductionKg: Math.round(15 * (targetPct / 20)),
+      currentProgressPercent: 0,
+      targetDate: getFutureDate(45),
+      status: "not_started",
+      category: "energy",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "goal_" + Date.now() + "_3",
+      title: "Plant-Forward Dining Habit",
+      description: "Incorporate 4 plant-based or vegetarian meals each week to lower dietary carbon footprint.",
+      targetCo2eReductionKg: Math.round(18 * (targetPct / 20)),
+      currentProgressPercent: 0,
+      targetDate: getFutureDate(60),
+      status: "not_started",
+      category: "food",
+      createdAt: new Date().toISOString()
+    }
+  ];
+}
+
+/**
+ * Creates an isolated, personalized account state for a separate user
+ */
+export function createFreshAccountState({ name, email, country = "India", preferredUnit = "kg", reductionTarget = 20 }) {
+  const normEmail = normalizeEmail(email);
+  const derivedName = name && name.trim()
+    ? name.trim()
+    : normEmail
+    ? normEmail.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, l => l.toUpperCase())
+    : "Eco Pioneer";
+
+  return {
+    user: {
+      id: "usr_" + Date.now(),
+      name: derivedName,
+      email: normEmail,
+      country: country || "India",
+      preferredUnit: preferredUnit || "kg",
+      reductionTarget: Number(reductionTarget) || 20,
+      points: 0,
+      streak: 0,
+      lastLoggedDate: null
+    },
+    activities: [],
+    goals: getStarterGoals(reductionTarget),
+    challenges: [
+      {
+        id: "ch_01",
+        title: "Transit Pioneer",
+        description: "Log at least 5 public transit or cycling trips this week.",
+        category: "transportation",
+        target: 5,
+        progress: 0,
+        unit: "trips",
+        points: 50,
+        difficulty: "easy",
+        adopted: false,
+        completed: false
+      },
+      {
+        id: "ch_02",
+        title: "Plant Power Week",
+        description: "Record 4 plant-based meals in the food category.",
+        category: "food",
+        target: 4,
+        progress: 0,
+        unit: "meals",
+        points: 50,
+        difficulty: "medium",
+        adopted: false,
+        completed: false
+      },
+      {
+        id: "ch_03",
+        title: "Phantom Watt Hunter",
+        description: "Log energy baseline under 10 kWh for 3 consecutive days.",
+        category: "energy",
+        target: 3,
+        progress: 0,
+        unit: "days",
+        points: 60,
+        difficulty: "hard",
+        adopted: false,
+        completed: false
+      },
+      {
+        id: "ch_04",
+        title: "Mindful Consumer",
+        description: "Keep shopping and apparel purchases at 0 for 7 straight days.",
+        category: "shopping",
+        target: 7,
+        progress: 0,
+        unit: "days",
+        points: 75,
+        difficulty: "medium",
+        adopted: false,
+        completed: false
+      }
+    ],
+    achievements: [
+      {
+        id: "ach_01",
+        name: "First Step",
+        description: "Record your very first carbon activity log.",
+        icon: "🌱",
+        points: 25,
+        unlocked: false,
+        unlockedAt: null
+      },
+      {
+        id: "ach_02",
+        name: "Green Traveler",
+        description: "Log 5 public transit or zero-emission commute trips.",
+        icon: "🚲",
+        points: 50,
+        unlocked: false,
+        unlockedAt: null
+      },
+      {
+        id: "ach_03",
+        name: "7-Day Streak",
+        description: "Maintain a continuous daily carbon logging streak for 7 days.",
+        icon: "🔥",
+        points: 75,
+        unlocked: false,
+        unlockedAt: null
+      },
+      {
+        id: "ach_04",
+        name: "Energy Warden",
+        description: "Reduce home electricity consumption by 20% compared to baseline.",
+        icon: "⚡",
+        points: 100,
+        unlocked: false,
+        unlockedAt: null
+      },
+      {
+        id: "ach_05",
+        name: "Eco Champion",
+        description: "Accumulate 500+ sustainability points through active habits.",
+        icon: "👑",
+        points: 150,
+        unlocked: false,
+        unlockedAt: null
+      }
+    ]
+  };
 }
 
 // Initial realistic pre-seeded dataset
@@ -280,15 +470,96 @@ const INITIAL_STATE = {
 
 class CarbonStore {
   constructor() {
+    this.ensureRegistry();
     this.state = this.loadState();
+  }
+
+  getActiveEmail() {
+    try {
+      const active = localStorage.getItem(ACTIVE_EMAIL_KEY);
+      if (active && active.trim()) {
+        return normalizeEmail(active);
+      }
+      const current = localStorage.getItem("ecotrack_current_user");
+      if (current) {
+        const cu = JSON.parse(current);
+        if (cu && cu.email) return normalizeEmail(cu.email);
+      }
+    } catch (e) {}
+    return DEMO_EMAIL;
+  }
+
+  setActiveEmail(email) {
+    const norm = normalizeEmail(email) || DEMO_EMAIL;
+    localStorage.setItem(ACTIVE_EMAIL_KEY, norm);
+  }
+
+  ensureRegistry() {
+    try {
+      let reg = [];
+      const raw = localStorage.getItem(REGISTRY_KEY);
+      if (raw) {
+        try { reg = JSON.parse(raw); } catch (e) {}
+      }
+      if (!Array.isArray(reg)) reg = [];
+
+      const demoExists = reg.some(a => normalizeEmail(a.email) === DEMO_EMAIL);
+      if (!demoExists) {
+        reg.unshift({
+          email: DEMO_EMAIL,
+          name: "Alex Rivera",
+          country: "United States",
+          isDemo: true,
+          createdAt: new Date().toISOString()
+        });
+        localStorage.setItem(REGISTRY_KEY, JSON.stringify(reg));
+      }
+      return reg;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  getRegisteredAccounts() {
+    return this.ensureRegistry();
+  }
+
+  saveToRegistry(user) {
+    if (!user || !user.email) return;
+    const normEmail = normalizeEmail(user.email);
+    try {
+      let reg = this.ensureRegistry();
+      const idx = reg.findIndex(a => normalizeEmail(a.email) === normEmail);
+      const accInfo = {
+        email: normEmail,
+        name: user.name || (normEmail ? normEmail.split("@")[0] : "Eco User"),
+        country: user.country || "India",
+        isDemo: normEmail === DEMO_EMAIL,
+        lastActive: new Date().toISOString()
+      };
+      if (idx >= 0) {
+        reg[idx] = { ...reg[idx], ...accInfo };
+      } else {
+        reg.push(accInfo);
+      }
+      localStorage.setItem(REGISTRY_KEY, JSON.stringify(reg));
+    } catch (e) {
+      console.warn("Could not save to accounts registry", e);
+    }
   }
 
   loadState() {
     try {
-      let stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) {
-        stored = localStorage.getItem("ecotrack_state_v1");
+      const activeEmail = this.getActiveEmail();
+      const accountKey = getAccountStorageKey(activeEmail);
+
+      let stored = localStorage.getItem(accountKey);
+
+      // Migration / fallback: if demo account and account key not set yet, check legacy storage
+      if (!stored && activeEmail === DEMO_EMAIL) {
+        stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("ecotrack_state_v1");
       }
+
       let parsed = null;
       if (stored) {
         try {
@@ -297,27 +568,33 @@ class CarbonStore {
       }
 
       if (!parsed) {
-        parsed = JSON.parse(JSON.stringify(INITIAL_STATE));
-      }
-
-      // Check if an active user profile was created via registration or modal
-      const currentUserRaw = localStorage.getItem("ecotrack_current_user");
-      if (currentUserRaw) {
-        try {
-          const cu = JSON.parse(currentUserRaw);
-          if (cu && cu.name) {
-            parsed.user = parsed.user || {};
-            parsed.user.name = cu.name;
-            if (cu.email) parsed.user.email = cu.email;
-            if (cu.country) parsed.user.country = cu.country;
+        if (activeEmail === DEMO_EMAIL) {
+          parsed = JSON.parse(JSON.stringify(INITIAL_STATE));
+        } else {
+          // Fresh separate account state
+          let name = "";
+          const curRaw = localStorage.getItem("ecotrack_current_user");
+          if (curRaw) {
+            try {
+              const cu = JSON.parse(curRaw);
+              if (cu && normalizeEmail(cu.email) === activeEmail) name = cu.name;
+            } catch (e) {}
           }
-        } catch (e) {}
+          parsed = createFreshAccountState({ name, email: activeEmail });
+        }
       }
 
+      // Ensure user object has correct email and defaults
+      if (!parsed.user) parsed.user = {};
+      parsed.user.email = activeEmail;
+      if (!parsed.user.name) {
+        parsed.user.name = activeEmail === DEMO_EMAIL ? "Alex Rivera" : activeEmail.split("@")[0];
+      }
+
+      // Normalize goals
       if (parsed.goals && Array.isArray(parsed.goals)) {
-        // Normalize goals to 3 statuses: not_started, in_progress, completed
         parsed.goals.forEach(g => {
-          const prog = g.currentProgressPercent || 0;
+          const prog = Number(g.currentProgressPercent) || 0;
           if (prog >= 100) {
             g.status = "completed";
             g.currentProgressPercent = 100;
@@ -328,6 +605,10 @@ class CarbonStore {
             g.currentProgressPercent = 0;
           }
         });
+      } else {
+        parsed.goals = activeEmail === DEMO_EMAIL
+          ? JSON.parse(JSON.stringify(INITIAL_STATE.goals))
+          : getStarterGoals(parsed.user.reductionTarget);
       }
 
       if (parsed.challenges && Array.isArray(parsed.challenges)) {
@@ -337,6 +618,8 @@ class CarbonStore {
           }
         });
       }
+
+      this.saveToRegistry(parsed.user);
       return parsed;
     } catch (e) {
       console.warn("Could not parse local storage, loading defaults", e);
@@ -346,19 +629,111 @@ class CarbonStore {
 
   saveState() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
-      localStorage.setItem("ecotrack_state_v1", JSON.stringify(this.state));
+      const email = (this.state && this.state.user && this.state.user.email)
+        ? normalizeEmail(this.state.user.email)
+        : this.getActiveEmail();
+
+      const accountKey = getAccountStorageKey(email);
+      const stateStr = JSON.stringify(this.state);
+
+      // 1. Save strictly to user's dedicated account key
+      localStorage.setItem(accountKey, stateStr);
+
+      // 2. Keep active email set
+      this.setActiveEmail(email);
+
+      // 3. Keep legacy mirror keys in sync for external readers
+      localStorage.setItem(STORAGE_KEY, stateStr);
+      localStorage.setItem("ecotrack_state_v1", stateStr);
+
       if (this.state.user) {
         localStorage.setItem("ecotrack_current_user", JSON.stringify({
           name: this.state.user.name,
           email: this.state.user.email,
           country: this.state.user.country
         }));
+        this.saveToRegistry(this.state.user);
       }
     } catch (e) {
       console.error("Failed to save state to localStorage", e);
     }
     this.dispatchChange();
+  }
+
+  /**
+   * Switch active account to another email.
+   * If the account exists, loads its isolated state and goals.
+   * If it doesn't exist, creates fresh account state with starter goals.
+   */
+  switchAccount(email, name = "", country = "India") {
+    const normEmail = normalizeEmail(email) || DEMO_EMAIL;
+
+    // Save currently active state first
+    if (this.state) {
+      this.saveState();
+    }
+
+    this.setActiveEmail(normEmail);
+
+    const accountKey = getAccountStorageKey(normEmail);
+    const existing = localStorage.getItem(accountKey);
+
+    if (existing) {
+      try {
+        this.state = JSON.parse(existing);
+        if (name && (!this.state.user.name || this.state.user.name === "Eco User" || this.state.user.name === "Eco Pioneer")) {
+          this.state.user.name = name;
+        }
+      } catch (e) {
+        this.state = normEmail === DEMO_EMAIL
+          ? JSON.parse(JSON.stringify(INITIAL_STATE))
+          : createFreshAccountState({ name, email: normEmail, country });
+      }
+    } else {
+      if (normEmail === DEMO_EMAIL) {
+        this.state = JSON.parse(JSON.stringify(INITIAL_STATE));
+      } else {
+        this.state = createFreshAccountState({ name, email: normEmail, country });
+      }
+    }
+
+    this.saveState();
+    return this.state;
+  }
+
+  /**
+   * Explicitly register a brand new account with fresh starter goals
+   */
+  registerAccount({ name, email, country = "India", preferredUnit = "kg", reductionTarget = 20 }) {
+    const normEmail = normalizeEmail(email);
+    if (!normEmail) throw new Error("A valid email address is required.");
+
+    this.setActiveEmail(normEmail);
+    this.state = createFreshAccountState({ name, email: normEmail, country, preferredUnit, reductionTarget });
+    this.saveState();
+    return this.state;
+  }
+
+  /**
+   * Log out active session
+   */
+  logout() {
+    localStorage.removeItem("ecotrack_current_user");
+    this.dispatchChange();
+  }
+
+  /**
+   * Delete an existing goal from active account
+   */
+  deleteGoal(id) {
+    if (!this.state.goals) return false;
+    const initialLen = this.state.goals.length;
+    this.state.goals = this.state.goals.filter(g => g.id !== id);
+    if (this.state.goals.length !== initialLen) {
+      this.saveState();
+      return true;
+    }
+    return false;
   }
 
   dispatchChange() {
@@ -558,125 +933,7 @@ class CarbonStore {
   }
 
   createNewUserProfile({ name, email, country = "India", preferredUnit = "kg", reductionTarget = 20 }) {
-    this.state = {
-      user: {
-        id: "usr_" + Date.now(),
-        name: name || "",
-        email: email || "user@example.com",
-        country: country,
-        preferredUnit: preferredUnit,
-        reductionTarget: reductionTarget,
-        points: 0,
-        streak: 0,
-        lastLoggedDate: null
-      },
-      activities: [],
-      goals: [],
-      challenges: [
-        {
-          id: "ch_01",
-          title: "Transit Pioneer",
-          description: "Log at least 5 public transit or cycling trips this week.",
-          category: "transportation",
-          target: 5,
-          progress: 0,
-          unit: "trips",
-          points: 50,
-          difficulty: "easy",
-          adopted: false,
-          completed: false
-        },
-        {
-          id: "ch_02",
-          title: "Plant Power Week",
-          description: "Record 4 plant-based meals in the food category.",
-          category: "food",
-          target: 4,
-          progress: 0,
-          unit: "meals",
-          points: 50,
-          difficulty: "medium",
-          adopted: false,
-          completed: false
-        },
-        {
-          id: "ch_03",
-          title: "Phantom Watt Hunter",
-          description: "Log energy baseline under 10 kWh for 3 consecutive days.",
-          category: "energy",
-          target: 3,
-          progress: 0,
-          unit: "days",
-          points: 60,
-          difficulty: "hard",
-          adopted: false,
-          completed: false
-        },
-        {
-          id: "ch_04",
-          title: "Mindful Consumer",
-          description: "Keep shopping and apparel purchases at 0 for 7 straight days.",
-          category: "shopping",
-          target: 7,
-          progress: 0,
-          unit: "days",
-          points: 75,
-          difficulty: "medium",
-          adopted: false,
-          completed: false
-        }
-      ],
-      achievements: [
-        {
-          id: "ach_01",
-          name: "First Step",
-          description: "Record your very first carbon activity log.",
-          icon: "🌱",
-          points: 25,
-          unlocked: false,
-          unlockedAt: null
-        },
-        {
-          id: "ach_02",
-          name: "Green Traveler",
-          description: "Log 5 public transit or zero-emission commute trips.",
-          icon: "🚲",
-          points: 50,
-          unlocked: false,
-          unlockedAt: null
-        },
-        {
-          id: "ach_03",
-          name: "7-Day Streak",
-          description: "Maintain a continuous daily carbon logging streak for 7 days.",
-          icon: "🔥",
-          points: 75,
-          unlocked: false,
-          unlockedAt: null
-        },
-        {
-          id: "ach_04",
-          name: "Energy Warden",
-          description: "Reduce home electricity consumption by 20% compared to baseline.",
-          icon: "⚡",
-          points: 100,
-          unlocked: false,
-          unlockedAt: null
-        },
-        {
-          id: "ach_05",
-          name: "Eco Champion",
-          description: "Accumulate 500+ sustainability points through active habits.",
-          icon: "👑",
-          points: 150,
-          unlocked: false,
-          unlockedAt: null
-        }
-      ]
-    };
-
-    this.saveState();
-    return this.state;
+    return this.registerAccount({ name, email, country, preferredUnit, reductionTarget });
   }
 
   resetUserAccount(options = {}) {
@@ -684,6 +941,7 @@ class CarbonStore {
   }
 
   restoreDemoData() {
+    this.setActiveEmail(DEMO_EMAIL);
     this.state = JSON.parse(JSON.stringify(INITIAL_STATE));
     this.saveState();
     return this.state;
@@ -772,3 +1030,7 @@ class CarbonStore {
 }
 
 export const store = new CarbonStore();
+
+if (typeof window !== "undefined") {
+  window.EcoTrackStore = store;
+}

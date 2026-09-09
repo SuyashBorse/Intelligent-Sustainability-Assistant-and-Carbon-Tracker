@@ -474,11 +474,17 @@
                 <h3>Personal Carbon Reduction Goals</h3>
                 <p>Track targets across statuses and log incremental progress toward your decarbonization milestones.</p>
               </div>
-              <div class="goal-filter-pills" id="goalFilterGroup">
-                <button class="goal-filter-btn active" data-goal-filter="all">All (<span id="countGoalAll">3</span>)</button>
-                <button class="goal-filter-btn" data-goal-filter="in_progress">In Progress (<span id="countGoalInProgress">1</span>)</button>
-                <button class="goal-filter-btn" data-goal-filter="not_started">Not Started (<span id="countGoalNotStarted">1</span>)</button>
-                <button class="goal-filter-btn" data-goal-filter="completed">Completed (<span id="countGoalCompleted">1</span>)</button>
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <div class="goal-filter-pills" id="goalFilterGroup">
+                  <button class="goal-filter-btn active" data-goal-filter="all">All (<span id="countGoalAll">3</span>)</button>
+                  <button class="goal-filter-btn" data-goal-filter="in_progress">In Progress (<span id="countGoalInProgress">1</span>)</button>
+                  <button class="goal-filter-btn" data-goal-filter="not_started">Not Started (<span id="countGoalNotStarted">1</span>)</button>
+                  <button class="goal-filter-btn" data-goal-filter="completed">Completed (<span id="countGoalCompleted">1</span>)</button>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="btnOpenCreateGoalModal" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span>+ Create Goal</span>
+                </button>
               </div>
             </div>
 
@@ -636,6 +642,30 @@
                   </div>
                 </div>
               </form>
+            </div>
+
+            <!-- Accounts on this Device Switcher Card -->
+            <div class="card" style="grid-column: 1 / -1; margin-top: 0.5rem;">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                  <div class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Accounts on this Device
+                  </div>
+                  <div class="card-subtitle">Each account maintains its own isolated reduction goals, activities, and metrics</div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnProfileCreateAccount">
+                    + New Account
+                  </button>
+                  <a href="login.html" class="btn btn-ghost btn-sm" style="text-decoration: none;">
+                    🔑 Switch Login
+                  </a>
+                </div>
+              </div>
+              <div id="profileAccountsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.85rem; padding-top: 0.5rem;">
+                <!-- Dynamically populated via app.js -->
+              </div>
             </div>
           </div>
         </section>
@@ -933,6 +963,70 @@
           <button type="button" class="btn btn-ghost" id="newProfileCancelBtn">Cancel</button>
           <button type="submit" class="btn btn-primary" id="btnSubmitNewProfile">
             Create Profile & Start
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL: Create New Custom Carbon Reduction Goal
+       ====================================================================== -->
+  <div class="modal-overlay" id="createGoalModal" role="dialog" aria-modal="true" aria-labelledby="createGoalModalTitle">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 id="createGoalModalTitle" style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          Create Carbon Reduction Goal
+        </h3>
+        <button class="modal-close-btn" id="createGoalModalCloseBtn" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="createGoalForm">
+        <div class="modal-body">
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+            Set a measurable, personal sustainability target. Track your progress incrementally as you adopt low-carbon habits.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="newGoalTitle">Goal Title <span class="req">*</span></label>
+            <input type="text" class="form-input" id="newGoalTitle" placeholder="e.g. Cycle to Work 3 Days a Week" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newGoalCategory">Category</label>
+            <select class="form-select" id="newGoalCategory">
+              <option value="transportation" selected>🚗 Transportation</option>
+              <option value="energy">⚡ Home Energy</option>
+              <option value="food">🥗 Diet & Food</option>
+              <option value="water">💧 Water Conservation</option>
+              <option value="shopping">🛍️ Mindful Shopping</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newGoalDesc">Action Plan / Description <span class="req">*</span></label>
+            <textarea class="form-textarea" id="newGoalDesc" rows="3" placeholder="e.g. Replace solo car driving with commuter bicycle on Mon, Wed, Fri to avoid petrol combustion." required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="newGoalTargetKg">Target CO₂e Reduction (kg)</label>
+              <input type="number" class="form-input" id="newGoalTargetKg" min="1" max="500" value="20" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="newGoalTargetDate">Target Completion Date</label>
+              <input type="date" class="form-input" id="newGoalTargetDate" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="createGoalModalCancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitCreateGoal">
+            Create Goal
           </button>
         </div>
       </form>

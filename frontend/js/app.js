@@ -495,8 +495,11 @@ function renderGoalCardHtml(g) {
           <div class="goal-title">${g.title}</div>
           <div class="goal-desc">${g.description}</div>
         </div>
-        <div class="goal-meta-badges">
+        <div class="goal-meta-badges" style="display: flex; align-items: center; gap: 0.4rem;">
           ${getGoalStatusBadge(g.status, g.currentProgressPercent)}
+          <button type="button" class="btn-delete-goal" data-goal-id="${g.id}" title="Remove Goal" aria-label="Remove Goal" style="background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; color: var(--text-muted); padding: 0.25rem 0.45rem; font-size: 0.78rem; transition: all var(--trans-fast);">
+            🗑️
+          </button>
         </div>
       </div>
 
@@ -635,6 +638,21 @@ function updateGoalsUI() {
     btn.addEventListener("click", () => {
       const goalId = btn.getAttribute("data-id");
       if (goalId) openGoalProgressModal(goalId);
+    });
+  });
+
+  // Bind Goal Delete buttons
+  document.querySelectorAll(".btn-delete-goal").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const goalId = btn.getAttribute("data-goal-id");
+      if (!goalId) return;
+      if (confirm("Are you sure you want to remove this goal from your account?")) {
+        store.deleteGoal(goalId);
+        showToast("Goal removed from your account.", "info");
+        updateGoalsUI();
+        updateDashboardUI();
+      }
     });
   });
 }
@@ -843,6 +861,78 @@ function setupGoalProgressModal() {
       updateGoalsUI();
     });
   });
+}
+
+// ==========================================================================
+// Create Custom Goal Modal
+// ==========================================================================
+function setupCreateGoalModal() {
+  const openBtn = document.getElementById("btnOpenCreateGoalModal");
+  const modal = document.getElementById("createGoalModal");
+  const closeBtn = document.getElementById("createGoalModalCloseBtn");
+  const cancelBtn = document.getElementById("createGoalModalCancelBtn");
+  const form = document.getElementById("createGoalForm");
+  const dateInput = document.getElementById("newGoalTargetDate");
+
+  function openModal() {
+    if (!modal) return;
+    modal.classList.add("active");
+    if (dateInput && !dateInput.value) {
+      const d = new Date();
+      d.setDate(d.getDate() + 30);
+      dateInput.value = d.toISOString().split("T")[0];
+    }
+    const titleInput = document.getElementById("newGoalTitle");
+    if (titleInput) titleInput.focus();
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.remove("active");
+    if (form) form.reset();
+  }
+
+  if (openBtn) openBtn.addEventListener("click", openModal);
+  if (closeBtn) closeBtn.addEventListener("click", closeModal);
+  if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const title = document.getElementById("newGoalTitle")?.value.trim();
+      const category = document.getElementById("newGoalCategory")?.value;
+      const description = document.getElementById("newGoalDesc")?.value.trim();
+      const targetKg = parseFloat(document.getElementById("newGoalTargetKg")?.value) || 20;
+      const targetDate = document.getElementById("newGoalTargetDate")?.value;
+
+      if (!title) {
+        showToast("Please provide a title for your goal.", "warning");
+        return;
+      }
+
+      const res = store.addGoal({
+        title,
+        category,
+        description,
+        targetCo2eReductionKg: targetKg,
+        targetDate
+      });
+
+      if (res.success) {
+        closeModal();
+        showToast(`🎯 Goal "${title}" created!`, "success");
+        updateGoalsUI();
+        updateDashboardUI();
+      } else if (res.reason === "already_exists") {
+        showToast(`A goal named "${title}" already exists in your account!`, "warning");
+      }
+    });
+  }
 }
 
 // ==========================================================================
@@ -1252,18 +1342,81 @@ function setupProfileHandlers() {
       const email = document.getElementById("createUserEmail").value.trim();
       const country = document.getElementById("createUserCountry").value;
 
-      store.createNewUserProfile({
+      store.registerAccount({
         name,
         email,
         country
       });
 
       closeNewProfileModal();
-      showToast(`🎉 Welcome to EcoTrack, ${name}! Your fresh profile is ready.`, "success");
+      showToast(`🎉 Welcome to EcoTrack, ${name}! Your fresh profile with separate goals is ready.`, "success");
       updateUserProfileUI();
       updateDashboardUI();
+      updateGoalsUI();
+      renderProfileAccountsList();
+      renderTrendChart("trendChartCanvas", activeTrendFilter);
+      renderCategoryChart("categoryChartCanvas");
+      loadAICoachRecommendations();
       switchView("dashboard");
     });
+  }
+
+  function renderProfileAccountsList() {
+    const listEl = document.getElementById("profileAccountsList");
+    if (!listEl) return;
+
+    const accounts = store.getRegisteredAccounts();
+    const activeEmail = store.getActiveEmail();
+
+    listEl.innerHTML = accounts.map(acc => {
+      const isActive = acc.email === activeEmail;
+      return `
+        <div style="background: ${isActive ? 'var(--surface-alt)' : 'var(--surface)'}; border: 1.5px solid ${isActive ? 'var(--primary)' : 'var(--border)'}; border-radius: var(--radius-md); padding: 1rem; position: relative;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.5rem;">
+            <div>
+              <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">${acc.name}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">${acc.email}</div>
+            </div>
+            <span class="badge ${acc.isDemo ? 'badge-info' : 'badge-completed'}" style="font-size: 0.7rem;">
+              ${acc.isDemo ? 'Demo User' : 'Personal'}
+            </span>
+          </div>
+          <div style="margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            ${isActive 
+              ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.3rem;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></span> Active Account
+                </span>`
+              : `<button type="button" class="btn btn-secondary btn-sm btn-switch-account" data-email="${acc.email}" data-name="${acc.name}">
+                  Switch to this Account
+                </button>`
+            }
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    listEl.querySelectorAll(".btn-switch-account").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const email = btn.getAttribute("data-email");
+        const name = btn.getAttribute("data-name");
+        store.switchAccount(email, name);
+        showToast(`Switched to ${name}'s account!`, "success");
+        updateUserProfileUI();
+        updateDashboardUI();
+        updateGoalsUI();
+        renderProfileAccountsList();
+        renderTrendChart("trendChartCanvas", activeTrendFilter);
+        renderCategoryChart("categoryChartCanvas");
+        loadAICoachRecommendations();
+      });
+    });
+  }
+
+  renderProfileAccountsList();
+
+  const btnProfileCreateAcc = document.getElementById("btnProfileCreateAccount");
+  if (btnProfileCreateAcc) {
+    btnProfileCreateAcc.addEventListener("click", openNewProfileModal);
   }
 
   const clearActivitiesBtn = document.getElementById("btnClearActivitiesBtn");
@@ -1694,16 +1847,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle Logout
   document.querySelectorAll(".btn-logout").forEach(btn => {
     btn.addEventListener("click", () => {
-      showToast("Logging out...", "info");
+      store.logout();
+      showToast("Signed out. Redirecting to login...", "info");
       setTimeout(() => {
-        window.location.href = "index.html";
-      }, 500);
+        window.location.href = "login.html";
+      }, 400);
     });
   });
 
   // Setup forms & first render
   setupActivityForm();
   setupGoalProgressModal();
+  setupCreateGoalModal();
   setupChallengeProgressModal();
   setupProfileHandlers();
   updateUserProfileUI();

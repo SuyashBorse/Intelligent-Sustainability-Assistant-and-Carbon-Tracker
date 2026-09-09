@@ -159,53 +159,20 @@
     </div>
   </div>
 
-  <script>
-    function saveAndRedirect(name, email) {
+  <script type="module">
+    import { store } from "./js/store.js";
+
+    function registerAndRedirect(name, email) {
       try {
-        const userName = name || "";
-        const userEmail = email || "user@example.com";
-
-        // Save active user profile
-        localStorage.setItem("ecotrack_current_user", JSON.stringify({
-          name: userName,
-          email: userEmail
-        }));
-
-        // Initialize 100% fresh profile state: 0 activities, 0 goals, 0 points, 0 streak
-        const freshState = {
-          user: {
-            id: "usr_" + Date.now(),
-            name: userName,
-            email: userEmail,
-            country: "India",
-            preferredUnit: "kg",
-            reductionTarget: 20,
-            points: 0,
-            streak: 0,
-            lastLoggedDate: null
-          },
-          activities: [],
-          goals: [],
-          challenges: [
-            { id: "ch_01", title: "Transit Pioneer", description: "Log at least 5 public transit or cycling trips this week.", category: "transportation", target: 5, progress: 0, unit: "trips", points: 50, difficulty: "easy", completed: false },
-            { id: "ch_02", title: "Plant Power Week", description: "Record 4 plant-based meals in the food category.", category: "food", target: 4, progress: 0, unit: "meals", points: 50, difficulty: "medium", completed: false },
-            { id: "ch_03", title: "Phantom Watt Hunter", description: "Log energy baseline under 10 kWh for 3 consecutive days.", category: "energy", target: 3, progress: 0, unit: "days", points: 60, difficulty: "hard", completed: false },
-            { id: "ch_04", title: "Mindful Consumer", description: "Keep shopping and apparel purchases at 0 for 7 straight days.", category: "shopping", target: 7, progress: 0, unit: "days", points: 75, difficulty: "medium", completed: false }
-          ],
-          achievements: [
-            { id: "ach_01", name: "First Step", description: "Record your very first carbon activity log.", icon: "🌱", points: 25, unlocked: false, unlockedAt: null },
-            { id: "ach_02", name: "Green Traveler", description: "Log 5 public transit or zero-emission commute trips.", icon: "🚲", points: 50, unlocked: false, unlockedAt: null },
-            { id: "ach_03", name: "7-Day Streak", description: "Maintain a continuous daily carbon logging streak for 7 days.", icon: "🔥", points: 75, unlocked: false, unlockedAt: null },
-            { id: "ach_04", name: "Energy Warden", description: "Reduce home electricity consumption by 20% compared to baseline.", icon: "⚡", points: 100, unlocked: false, unlockedAt: null },
-            { id: "ach_05", name: "Eco Champion", description: "Accumulate 500+ sustainability points through active habits.", icon: "👑", points: 150, unlocked: false, unlockedAt: null }
-          ]
-        };
-
-        // Write to both keys to be 100% synchronized
-        localStorage.setItem("carbon_tracker_state_v1", JSON.stringify(freshState));
-        localStorage.setItem("ecotrack_state_v1", JSON.stringify(freshState));
+        store.registerAccount({
+          name: name || "",
+          email: email || "user@example.com",
+          country: "India",
+          preferredUnit: "kg",
+          reductionTarget: 20
+        });
       } catch (e) {
-        console.error("Could not save registration state", e);
+        console.error("Could not register account", e);
       }
       window.location.href = "dashboard.html";
     }
@@ -214,16 +181,14 @@
       e.preventDefault();
       const name = document.getElementById("regName").value.trim();
       const email = document.getElementById("regEmail").value.trim();
-      saveAndRedirect(name, email);
+      registerAndRedirect(name, email);
     });
 
     document.getElementById("btnGoogleSignUp").addEventListener("click", function() {
       const name = prompt("Enter your name for your Google EcoTrack profile:", "Suyash Borse");
       if (name) {
         const email = name.toLowerCase().replace(/\s+/g, ".") + "@gmail.com";
-        saveAndRedirect(name, email);
-      } else {
-        window.location.href = "dashboard.html";
+        registerAndRedirect(name, email);
       }
     });
 
