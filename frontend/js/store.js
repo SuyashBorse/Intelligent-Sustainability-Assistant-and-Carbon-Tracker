@@ -9,7 +9,7 @@ import { calculateEmission } from "./calculator.js";
 const STORAGE_KEY = "carbon_tracker_state_v1";
 const ACTIVE_EMAIL_KEY = "ecotrack_active_email";
 const REGISTRY_KEY = "ecotrack_accounts_registry";
-export const DEMO_EMAIL = "alex.rivera@example.com";
+export const DEMO_EMAIL = "kalpesh@demo.com";
 
 // Helper for generating recent dates
 function getPastDate(daysAgo) {
@@ -209,8 +209,8 @@ export function createFreshAccountState({ name, email, country = "India", prefer
 const INITIAL_STATE = {
   user: {
     id: "usr_demo_01",
-    name: "Alex Rivera",
-    email: "alex.rivera@example.com",
+    name: "Kalpesh",
+    email: "kalpesh@demo.com",
     country: "United States",
     preferredUnit: "kg",
     reductionTarget: 20, // percentage
@@ -507,7 +507,7 @@ class CarbonStore {
       if (!demoExists) {
         reg.unshift({
           email: DEMO_EMAIL,
-          name: "Alex Rivera",
+          name: "Kalpesh",
           country: "United States",
           isDemo: true,
           createdAt: new Date().toISOString()
@@ -588,7 +588,7 @@ class CarbonStore {
       if (!parsed.user) parsed.user = {};
       parsed.user.email = activeEmail;
       if (!parsed.user.name) {
-        parsed.user.name = activeEmail === DEMO_EMAIL ? "Alex Rivera" : activeEmail.split("@")[0];
+        parsed.user.name = activeEmail === DEMO_EMAIL ? "Kalpesh" : activeEmail.split("@")[0];
       }
 
       // Normalize goals

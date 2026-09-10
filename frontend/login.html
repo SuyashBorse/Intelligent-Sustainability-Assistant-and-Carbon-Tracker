@@ -153,17 +153,11 @@
 
       <div style="margin-top: 1.25rem; text-align: center;">
         <button type="button" id="btnUseDemoAccount" class="btn btn-ghost btn-sm" style="color: var(--text-muted); font-size: 0.8rem;">
-          ⚡ Quick Tour: Sign in as Demo User (Alex Rivera)
+          ⚡ Quick Tour: Sign in as Demo User (Kalpesh)
         </button>
       </div>
 
-      <!-- Existing Local Accounts Switcher -->
-      <div id="knownAccountsSection" style="margin-top: 1.25rem; display: none; border-top: 1px dashed var(--border); padding-top: 1rem; text-align: left;">
-        <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
-          Or switch to an existing account on this device:
-        </div>
-        <div id="knownAccountsList" style="display: flex; flex-direction: column; gap: 0.4rem;"></div>
-      </div>
+
 
       <div style="text-align: center; margin-top: 1.5rem; font-size: 0.88rem; color: var(--text-muted);">
         Don't have an account yet? <a href="register.html" style="font-weight: 600;">Sign up for free</a>
@@ -192,7 +186,7 @@
     });
 
     document.getElementById('btnUseDemoAccount').addEventListener('click', function() {
-      performLogin("Alex Rivera", DEMO_EMAIL);
+      performLogin("Kalpesh", DEMO_EMAIL);
     });
 
     document.getElementById('btnGoogleSignIn').addEventListener('click', function() {
@@ -203,35 +197,7 @@
       }
     });
 
-    // Populate registered accounts if any exist on this device
-    try {
-      const accounts = store.getRegisteredAccounts();
-      const listEl = document.getElementById("knownAccountsList");
-      const sectionEl = document.getElementById("knownAccountsSection");
-      if (accounts && accounts.length > 0 && listEl && sectionEl) {
-        sectionEl.style.display = "block";
-        listEl.innerHTML = accounts.map(acc => `
-          <button type="button" class="btn btn-secondary btn-sm account-chip-btn" data-email="${acc.email}" data-name="${acc.name}" style="display: flex; align-items: center; justify-content: space-between; width: 100%; text-align: left; padding: 0.45rem 0.75rem; font-size: 0.82rem;">
-            <span>
-              <strong>${acc.name}</strong> <span style="color: var(--text-muted); font-size: 0.76rem;">(${acc.email})</span>
-            </span>
-            <span class="badge ${acc.isDemo ? 'badge-info' : 'badge-completed'}" style="font-size: 0.68rem; padding: 0.15rem 0.4rem;">
-              ${acc.isDemo ? 'Demo User' : 'Personal'}
-            </span>
-          </button>
-        `).join("");
 
-        listEl.querySelectorAll(".account-chip-btn").forEach(btn => {
-          btn.addEventListener("click", () => {
-            const email = btn.getAttribute("data-email");
-            const name = btn.getAttribute("data-name");
-            performLogin(name, email);
-          });
-        });
-      }
-    } catch (err) {
-      console.warn("Could not load known accounts", err);
-    }
 
     // Theme Toggle Handler
     (function() {

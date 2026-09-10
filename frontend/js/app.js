@@ -1264,7 +1264,7 @@ function updateUserProfileUI() {
   // Demo Notice Banner (Shown only when using demo user)
   const demoBanner = document.getElementById("demoBanner");
   if (demoBanner) {
-    if (name === "Alex Rivera" && !localStorage.getItem("dismissed_demo_banner")) {
+    if (name === "Kalpesh" && !localStorage.getItem("dismissed_demo_banner")) {
       demoBanner.style.display = "flex";
     } else {
       demoBanner.style.display = "none";
@@ -1278,8 +1278,8 @@ function openNewProfileModal() {
     const user = store.getState().user || {};
     const nameInput = document.getElementById("createUserName");
     const emailInput = document.getElementById("createUserEmail");
-    if (nameInput) nameInput.value = user.name === "Alex Rivera" ? "" : (user.name || "");
-    if (emailInput) emailInput.value = user.email === "alex.rivera@example.com" ? "" : (user.email || "");
+    if (nameInput) nameInput.value = user.name === "Kalpesh" ? "" : (user.name || "");
+    if (emailInput) emailInput.value = user.email === "kalpesh@demo.com" ? "" : (user.email || "");
     modal.classList.remove("modal-closing");
     modal.classList.add("open");
   }
@@ -1353,7 +1353,6 @@ function setupProfileHandlers() {
       updateUserProfileUI();
       updateDashboardUI();
       updateGoalsUI();
-      renderProfileAccountsList();
       renderTrendChart("trendChartCanvas", activeTrendFilter);
       renderCategoryChart("categoryChartCanvas");
       loadAICoachRecommendations();
@@ -1361,63 +1360,7 @@ function setupProfileHandlers() {
     });
   }
 
-  function renderProfileAccountsList() {
-    const listEl = document.getElementById("profileAccountsList");
-    if (!listEl) return;
 
-    const accounts = store.getRegisteredAccounts();
-    const activeEmail = store.getActiveEmail();
-
-    listEl.innerHTML = accounts.map(acc => {
-      const isActive = acc.email === activeEmail;
-      return `
-        <div style="background: ${isActive ? 'var(--surface-alt)' : 'var(--surface)'}; border: 1.5px solid ${isActive ? 'var(--primary)' : 'var(--border)'}; border-radius: var(--radius-md); padding: 1rem; position: relative;">
-          <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.5rem;">
-            <div>
-              <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">${acc.name}</div>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">${acc.email}</div>
-            </div>
-            <span class="badge ${acc.isDemo ? 'badge-info' : 'badge-completed'}" style="font-size: 0.7rem;">
-              ${acc.isDemo ? 'Demo User' : 'Personal'}
-            </span>
-          </div>
-          <div style="margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-            ${isActive 
-              ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.3rem;">
-                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></span> Active Account
-                </span>`
-              : `<button type="button" class="btn btn-secondary btn-sm btn-switch-account" data-email="${acc.email}" data-name="${acc.name}">
-                  Switch to this Account
-                </button>`
-            }
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    listEl.querySelectorAll(".btn-switch-account").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const email = btn.getAttribute("data-email");
-        const name = btn.getAttribute("data-name");
-        store.switchAccount(email, name);
-        showToast(`Switched to ${name}'s account!`, "success");
-        updateUserProfileUI();
-        updateDashboardUI();
-        updateGoalsUI();
-        renderProfileAccountsList();
-        renderTrendChart("trendChartCanvas", activeTrendFilter);
-        renderCategoryChart("categoryChartCanvas");
-        loadAICoachRecommendations();
-      });
-    });
-  }
-
-  renderProfileAccountsList();
-
-  const btnProfileCreateAcc = document.getElementById("btnProfileCreateAccount");
-  if (btnProfileCreateAcc) {
-    btnProfileCreateAcc.addEventListener("click", openNewProfileModal);
-  }
 
   const clearActivitiesBtn = document.getElementById("btnClearActivitiesBtn");
   if (clearActivitiesBtn) {

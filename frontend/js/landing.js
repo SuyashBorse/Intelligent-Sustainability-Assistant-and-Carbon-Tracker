@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnDemoLogin = document.getElementById("btnModalDemoLogin");
   if (btnDemoLogin) {
     btnDemoLogin.addEventListener("click", () => {
-      authenticateAndRedirect("Alex Rivera", DEMO_EMAIL);
+      authenticateAndRedirect("Kalpesh", DEMO_EMAIL);
     });
   }
 

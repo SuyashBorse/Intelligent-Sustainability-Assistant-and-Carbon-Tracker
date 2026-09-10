@@ -722,8 +722,13 @@ section[id],
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.95);
 }
 
+[data-theme="dark"] .hero-trust-bar {
+  background: rgba(30, 41, 59, 0.7); /* translucent var(--surface) */
+  border-color: var(--border);
+}
+
 [data-theme="dark"] .hero-trust-item {
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 [data-theme="dark"] .landing-footer {
