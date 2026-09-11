@@ -1,5 +1,5 @@
 /**
- * EcoTrack AI — Landing Page Lightweight Performance Engine
+ * EcoTrack — Landing Page Lightweight Performance Engine
  */
 
 import { store, DEMO_EMAIL } from "./store.js";
