@@ -466,7 +466,7 @@
   letter-spacing: 0.03em;
 }
 
-.badge-transport { background: var(--cat-transport-bg); color: var(--cat-transport); border: 1px solid #bfdbfe; }
+.badge-transportation { background: var(--cat-transport-bg); color: var(--cat-transport); border: 1px solid #bfdbfe; }
 .badge-energy { background: var(--cat-energy-bg); color: var(--cat-energy); border: 1px solid #fde68a; }
 .badge-food { background: var(--cat-food-bg); color: var(--cat-food); border: 1px solid #a7f3d0; }
 .badge-water { background: var(--cat-water-bg); color: var(--cat-water); border: 1px solid #a5f3fc; }
