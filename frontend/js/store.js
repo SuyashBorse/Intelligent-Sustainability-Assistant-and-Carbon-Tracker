@@ -41,7 +41,7 @@ export function getStarterGoals(reductionTarget = 20) {
   const targetPct = Number(reductionTarget) || 20;
   return [
     {
-      id: "goal_" + Date.now() + "_1",
+      id: crypto.randomUUID(),
       title: "Cut Personal Commute Emissions",
       description: "Replace 2 weekly solo car commutes with cycling, train, bus, or carpooling.",
       targetCo2eReductionKg: Math.round(20 * (targetPct / 20)),
@@ -52,7 +52,7 @@ export function getStarterGoals(reductionTarget = 20) {
       createdAt: new Date().toISOString()
     },
     {
-      id: "goal_" + Date.now() + "_2",
+      id: crypto.randomUUID(),
       title: "Home Energy Conservation",
       description: "Lower grid electricity consumption through smart thermostat scheduling and phantom load reduction.",
       targetCo2eReductionKg: Math.round(15 * (targetPct / 20)),
@@ -63,7 +63,7 @@ export function getStarterGoals(reductionTarget = 20) {
       createdAt: new Date().toISOString()
     },
     {
-      id: "goal_" + Date.now() + "_3",
+      id: crypto.randomUUID(),
       title: "Plant-Forward Dining Habit",
       description: "Incorporate 4 plant-based or vegetarian meals each week to lower dietary carbon footprint.",
       targetCo2eReductionKg: Math.round(18 * (targetPct / 20)),
@@ -89,7 +89,7 @@ export function createFreshAccountState({ name, email, country = "India", prefer
 
   return {
     user: {
-      id: "usr_" + Date.now(),
+      id: crypto.randomUUID(),
       name: derivedName,
       email: normEmail,
       country: country || "India",
@@ -594,6 +594,9 @@ class CarbonStore {
       // Normalize goals
       if (parsed.goals && Array.isArray(parsed.goals)) {
         parsed.goals.forEach(g => {
+          if (!g.id || g.id.startsWith("goal_")) {
+            g.id = crypto.randomUUID();
+          }
           const prog = Number(g.currentProgressPercent) || 0;
           if (prog >= 100) {
             g.status = "completed";
@@ -609,6 +612,15 @@ class CarbonStore {
         parsed.goals = activeEmail === DEMO_EMAIL
           ? JSON.parse(JSON.stringify(INITIAL_STATE.goals))
           : getStarterGoals(parsed.user.reductionTarget);
+      }
+
+      // Normalize activities (migrate legacy IDs to UUIDs)
+      if (parsed.activities && Array.isArray(parsed.activities)) {
+        parsed.activities.forEach(a => {
+          if (!a.id || a.id.startsWith("act_")) {
+            a.id = crypto.randomUUID();
+          }
+        });
       }
 
       if (parsed.challenges && Array.isArray(parsed.challenges)) {
@@ -754,7 +766,7 @@ class CarbonStore {
     }
 
     const newActivity = {
-      id: "act_" + Date.now(),
+      id: crypto.randomUUID(),
       category: calc.category,
       activityType: calc.activityType,
       quantity: calc.quantity,
@@ -850,7 +862,7 @@ class CarbonStore {
     const defaultTargetDate = d.toISOString().split("T")[0];
 
     const newGoal = {
-      id: "goal_" + Date.now(),
+      id: crypto.randomUUID(),
       title: goalData.title,
       description: goalData.description || goalData.action || "Adopted action from AI Sustainability Coach.",
       targetCo2eReductionKg: Number(goalData.targetCo2eReductionKg || goalData.estimated_impact_kg_co2_per_month || 20),

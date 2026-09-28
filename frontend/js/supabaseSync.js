@@ -10,13 +10,16 @@ export async function hydrateStoreFromSupabase() {
     
     const user = session.user;
     
+    // Switch local store to the authenticated user's profile
+    store.switchAccount(user.email, user.user_metadata?.full_name || user.email);
+    
     // Fetch all user data concurrently
     const [
       { data: profile },
       { data: activities },
       { data: goals }
     ] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', user.id).single(),
+      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
       supabase.from('activity_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('goals').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
     ]);
@@ -42,7 +45,7 @@ export async function hydrateStoreFromSupabase() {
       }));
     }
     
-    if (goals) {
+    if (goals && goals.length > 0) {
       store.state.goals = goals.map(g => ({
         id: g.id,
         title: g.title,
@@ -54,6 +57,21 @@ export async function hydrateStoreFromSupabase() {
         category: g.category,
         createdAt: g.created_at
       }));
+    } else if (goals && goals.length === 0 && store.state.goals.length > 0) {
+      store.state.goals.forEach(goal => {
+        supabase.from('goals').insert({
+          id: goal.id,
+          user_id: user.id,
+          title: goal.title,
+          description: goal.description,
+          target_co2e_reduction: goal.targetCo2eReductionKg,
+          target_date: goal.targetDate,
+          current_progress: goal.currentProgressPercent,
+          status: goal.status,
+          category: goal.category,
+          created_at: goal.createdAt
+        }).then(() => {});
+      });
     }
     
     // Save to local and trigger UI update
@@ -170,11 +188,13 @@ function syncGoalUpdate(goal) {
 }
 
 function syncProfile(userId) {
-  supabase.from('profiles').update({
+  supabase.from('profiles').upsert({
+    id: userId,
     points: store.state.user.points,
     streak: store.state.user.streak,
-    last_logged_date: store.state.user.lastLoggedDate
-  }).eq('id', userId)
+    last_logged_date: store.state.user.lastLoggedDate,
+    full_name: store.state.user.name
+  }, { onConflict: 'id' })
     .then(({error}) => { if(error) console.error("Sync error:", error); });
 }
 

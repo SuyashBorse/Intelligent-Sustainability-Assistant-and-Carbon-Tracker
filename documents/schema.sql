@@ -1,5 +1,19 @@
 -- Supabase Schema for EcoTrack
 
+-- Drop existing tables to avoid 'already exists' errors
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_new_user();
+
+DROP TABLE IF EXISTS user_achievements CASCADE;
+DROP TABLE IF EXISTS achievements CASCADE;
+DROP TABLE IF EXISTS user_challenges CASCADE;
+DROP TABLE IF EXISTS challenges CASCADE;
+DROP TABLE IF EXISTS ai_recommendations CASCADE;
+DROP TABLE IF EXISTS activity_logs CASCADE;
+DROP TABLE IF EXISTS goals CASCADE;
+DROP TABLE IF EXISTS emission_factors CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
+
 -- Set up tables
 
 -- profiles
@@ -41,7 +55,7 @@ CREATE TABLE activity_logs (
   activity_type TEXT,
   quantity NUMERIC,
   unit TEXT,
-  emission_factor_id TEXT REFERENCES emission_factors(id),
+  emission_factor_id TEXT,
   co2e_kg NUMERIC,
   activity_date DATE DEFAULT current_date,
   notes TEXT,
