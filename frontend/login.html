@@ -167,8 +167,9 @@
 
   <script type="module">
     import { store, DEMO_EMAIL } from "./js/store.js";
+    import { signIn, signInWithGoogle } from "./js/auth.js";
 
-    function performLogin(name, email) {
+    function performLocalLoginFallback(name, email) {
       try {
         store.switchAccount(email, name);
       } catch (err) {
@@ -177,23 +178,45 @@
       window.location.href = 'dashboard.html';
     }
 
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value.trim();
-      const prefix = email.split('@')[0].replace(/[._-]/g, ' ');
-      const name = prefix.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      performLogin(name, email);
+      const password = document.getElementById('loginPassword').value;
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      
+      try {
+        submitBtn.textContent = 'Signing in...';
+        submitBtn.disabled = true;
+        
+        // Attempt Supabase SignIn
+        await signIn(email, password);
+        
+        // Setup local store context
+        const prefix = email.split('@')[0].replace(/[._-]/g, ' ');
+        const name = prefix.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        store.switchAccount(email, name);
+        
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        console.error("Supabase signin failed:", err);
+        alert(err.message || "Failed to sign in. Please check your credentials.");
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
     });
 
     document.getElementById('btnUseDemoAccount').addEventListener('click', function() {
-      performLogin("Kalpesh", DEMO_EMAIL);
+      performLocalLoginFallback("Kalpesh", DEMO_EMAIL);
     });
 
-    document.getElementById('btnGoogleSignIn').addEventListener('click', function() {
-      const name = prompt("Enter your name for your Google EcoTrack profile:", "Suyash Borse");
-      if (name) {
-        const email = name.toLowerCase().replace(/\s+/g, ".") + "@gmail.com";
-        performLogin(name, email);
+    document.getElementById('btnGoogleSignIn').addEventListener('click', async function() {
+      try {
+        await signInWithGoogle();
+      } catch (err) {
+        console.error("Google login failed", err);
+        alert(err.message || "Failed to initiate Google sign-in.");
       }
     });
 

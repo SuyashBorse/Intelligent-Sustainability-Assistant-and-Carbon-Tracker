@@ -161,9 +161,24 @@
 
   <script type="module">
     import { store } from "./js/store.js";
+    import { signUp, signInWithGoogle } from "./js/auth.js";
 
-    function registerAndRedirect(name, email) {
+    document.getElementById("registerForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const name = document.getElementById("regName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value;
+      
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      
       try {
+        submitBtn.textContent = 'Creating Account...';
+        submitBtn.disabled = true;
+        
+        await signUp(email, password, name);
+        
+        // Also register locally for immediate UI response
         store.registerAccount({
           name: name || "",
           email: email || "user@example.com",
@@ -171,24 +186,24 @@
           preferredUnit: "kg",
           reductionTarget: 20
         });
-      } catch (e) {
-        console.error("Could not register account", e);
+        
+        alert("Account created successfully! You can now log in.");
+        window.location.href = "login.html";
+      } catch (err) {
+        console.error("Could not register account", err);
+        alert(err.message || "Failed to create account. Please try again.");
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
-      window.location.href = "dashboard.html";
-    }
-
-    document.getElementById("registerForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const name = document.getElementById("regName").value.trim();
-      const email = document.getElementById("regEmail").value.trim();
-      registerAndRedirect(name, email);
     });
 
-    document.getElementById("btnGoogleSignUp").addEventListener("click", function() {
-      const name = prompt("Enter your name for your Google EcoTrack profile:", "Suyash Borse");
-      if (name) {
-        const email = name.toLowerCase().replace(/\s+/g, ".") + "@gmail.com";
-        registerAndRedirect(name, email);
+    document.getElementById("btnGoogleSignUp").addEventListener("click", async function() {
+      try {
+        await signInWithGoogle();
+      } catch (err) {
+        console.error("Google sign-up failed", err);
+        alert(err.message || "Failed to initiate Google sign-up.");
       }
     });
 

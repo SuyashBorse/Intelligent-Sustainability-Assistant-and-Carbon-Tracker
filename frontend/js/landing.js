@@ -3,8 +3,19 @@
  */
 
 import { store, DEMO_EMAIL } from "./store.js";
+import { signIn, signInWithGoogle, getSession } from "./auth.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const session = await getSession();
+    if (session) {
+      window.location.href = "dashboard.html";
+      return;
+    }
+  } catch (e) {
+    console.error("Session check failed", e);
+  }
+
   const header = document.querySelector(".landing-header");
   const navLinks = document.querySelectorAll(".landing-nav-links a");
   const trackedSections = [
@@ -206,11 +217,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const loginForm = document.getElementById("homepageLoginForm");
   if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("modalLoginEmail")?.value || "";
-      const name = email ? email.split("@")[0].replace(/[._]/g, " ") : "Eco User";
-      authenticateAndRedirect(name, email);
+      const password = document.getElementById("modalLoginPassword")?.value || "";
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      
+      try {
+        submitBtn.textContent = 'Signing in...';
+        submitBtn.disabled = true;
+        await signIn(email, password);
+        const name = email ? email.split("@")[0].replace(/[._]/g, " ") : "Eco User";
+        store.switchAccount(email, name);
+        window.location.href = "dashboard.html";
+      } catch (err) {
+        console.error("Login failed:", err);
+        alert(err.message || "Failed to sign in. Please check your credentials.");
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
     });
   }
 
@@ -223,13 +250,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const btnGoogleLogin = document.getElementById("btnModalGoogleLogin");
   if (btnGoogleLogin) {
-    btnGoogleLogin.addEventListener("click", () => {
-      const name = prompt("Enter your name for your Google EcoTrack profile:", "Suyash Borse");
-      if (name) {
-        const email = name.toLowerCase().replace(/\s+/g, ".") + "@gmail.com";
-        authenticateAndRedirect(name, email);
-      } else {
-        authenticateAndRedirect("Google User", "google.user@example.com");
+    btnGoogleLogin.addEventListener("click", async () => {
+      try {
+        await signInWithGoogle();
+      } catch (err) {
+        console.error("Google sign-in failed", err);
+        alert(err.message || "Failed to initiate Google sign-in.");
       }
     });
   }

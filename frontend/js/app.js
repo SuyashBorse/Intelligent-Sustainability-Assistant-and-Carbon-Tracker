@@ -4,6 +4,8 @@
  */
 
 import { store } from "./store.js";
+import "./supabaseSync.js"; // Initialize Supabase Optimistic Sync
+import { signOut } from "./auth.js";
 import { EMISSION_FACTORS, getFactorsByCategory, getFactorById } from "./emissionFactors.js";
 import { calculateEmission, formatCarbonWeight } from "./calculator.js";
 import { renderTrendChart, renderCategoryChart, renderAnalyticsChart } from "./charts.js";
@@ -1316,7 +1318,11 @@ function setupProfileHandlers() {
   const btnBannerCreate = document.getElementById("btnBannerCreateProfile");
   const btnDismissBanner = document.getElementById("btnDismissDemoBanner");
 
-  if (btnBannerCreate) btnBannerCreate.addEventListener("click", openNewProfileModal);
+  if (btnBannerCreate) {
+    btnBannerCreate.addEventListener("click", () => {
+      window.location.href = "register.html";
+    });
+  }
   if (btnDismissBanner) {
     btnDismissBanner.addEventListener("click", () => {
       localStorage.setItem("dismissed_demo_banner", "true");
@@ -1789,7 +1795,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Handle Logout
   document.querySelectorAll(".btn-logout").forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
+      try {
+        await signOut();
+      } catch (err) {
+        console.error("Supabase signOut error:", err);
+      }
       store.logout();
       showToast("Signed out. Redirecting to login...", "info");
       setTimeout(() => {
