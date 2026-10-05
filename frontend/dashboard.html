@@ -200,7 +200,7 @@
                 <span class="kpi-unit">kg CO₂e</span>
               </div>
               <div class="kpi-footer">
-                <span class="trend-badge trend-down">↓ 1.2 kg</span>
+                <span class="trend-badge" id="kpiTodayTrend">N/A</span>
                 <span style="color: var(--text-muted);">vs yesterday</span>
               </div>
             </div>
@@ -218,7 +218,7 @@
                 <span class="kpi-unit">kg CO₂e</span>
               </div>
               <div class="kpi-footer">
-                <span class="trend-badge trend-down">↓ 8%</span>
+                <span class="trend-badge" id="kpiWeekTrend">N/A</span>
                 <span style="color: var(--text-muted);">from prior week</span>
               </div>
             </div>
@@ -236,7 +236,7 @@
                 <span class="kpi-unit">kg CO₂e</span>
               </div>
               <div class="kpi-footer">
-                <span class="trend-badge trend-neutral">Target: &lt;210 kg</span>
+                <span class="trend-badge trend-neutral" id="kpiMonthTrend">Target: &lt;210 kg</span>
               </div>
             </div>
 
@@ -422,28 +422,39 @@
           <div class="analytics-summary-cards">
             <div class="analytics-stat-box">
               <div class="title">Daily Average</div>
-              <div class="number">6.18 <small style="font-size: 0.8rem; font-weight: 500;">kg</small></div>
+              <div class="number"><span id="analyticsDailyAvgVal">0.00</span> <small style="font-size: 0.8rem; font-weight: 500;">kg</small></div>
             </div>
             <div class="analytics-stat-box">
               <div class="title">Primary Category</div>
-              <div class="number" style="color: var(--cat-transport);">Transport</div>
+              <div class="number" id="analyticsPrimaryCatVal" style="color: var(--text-main); text-transform: capitalize;">N/A</div>
             </div>
             <div class="analytics-stat-box">
-              <div class="title">Green Trip Share</div>
-              <div class="number" style="color: var(--primary);">48%</div>
+              <div class="title">Green Activity Share</div>
+              <div class="number" id="analyticsGreenShareVal" style="color: var(--primary);">0%</div>
             </div>
             <div class="analytics-stat-box">
               <div class="title">Projected Annual</div>
-              <div class="number">2.2 <small style="font-size: 0.8rem; font-weight: 500;">tonnes</small></div>
+              <div class="number"><span id="analyticsAnnualVal">0.0</span> <small style="font-size: 0.8rem; font-weight: 500;">tonnes</small></div>
             </div>
           </div>
 
-          <div class="card" style="margin-bottom: 2rem;">
-            <div class="card-header">
-              <div class="card-title">Category Comparison (kg CO₂e)</div>
+          <div class="charts-grid" style="margin-bottom: 2rem;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Category Comparison (kg CO₂e)</div>
+              </div>
+              <div class="chart-container" style="height: 360px;">
+                <canvas id="analyticsBarCanvas"></canvas>
+              </div>
             </div>
-            <div class="chart-container" style="height: 360px;">
-              <canvas id="analyticsBarCanvas"></canvas>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Goals & Challenges Progress</div>
+              </div>
+              <div class="chart-container" style="height: 360px;">
+                <canvas id="goalsChallengesCanvas"></canvas>
+              </div>
             </div>
           </div>
         </section>

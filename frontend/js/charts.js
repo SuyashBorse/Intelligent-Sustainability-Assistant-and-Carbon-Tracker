@@ -261,21 +261,28 @@ export function renderAnalyticsChart(canvasId) {
 
   // @ts-ignore
   analyticsChartInstance = new window.Chart(ctx, {
-    type: "bar",
+    type: "polarArea",
     data: {
       labels: ["Transportation", "Energy", "Food", "Water", "Shopping"],
       datasets: [
         {
-          label: "Current Period (kg CO₂e)",
+          label: "Emissions (kg CO₂e)",
           data: [cb.transportation, cb.energy, cb.food, cb.water, cb.shopping],
           backgroundColor: [
+            COLORS.transportation + "aa", 
+            COLORS.energy + "aa",
+            COLORS.food + "aa",
+            COLORS.water + "aa",
+            COLORS.shopping + "aa"
+          ],
+          borderColor: [
             COLORS.transportation,
             COLORS.energy,
             COLORS.food,
             COLORS.water,
             COLORS.shopping
           ],
-          borderRadius: 6
+          borderWidth: 2
         }
       ]
     },
@@ -283,26 +290,176 @@ export function renderAnalyticsChart(canvasId) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: false },
+        legend: { 
+          position: 'right',
+          labels: {
+            color: tc.legendColor,
+            font: { size: 13, weight: "500" },
+            padding: 20
+          }
+        },
         tooltip: {
           backgroundColor: tc.tooltipBg,
+          padding: 12,
+          titleFont: { size: 13, weight: "bold" },
+          bodyFont: { size: 13 },
+          displayColors: true,
           callbacks: {
-            label: ctx => ` ${ctx.parsed.y} kg CO₂e`
+            label: ctx => ` ${ctx.label}: ${ctx.raw.toFixed(1)} kg CO₂e`
           }
         }
       },
       scales: {
-        y: {
-          beginAtZero: true,
-          grid: { color: tc.gridColor },
+        r: {
+          grid: { 
+            color: tc.gridColor
+          },
           ticks: {
-            color: tc.tickColor,
-            callback: val => `${val} kg`
+            display: false, // hide the internal numbers to keep it clean
+            backdropColor: "transparent"
+          }
+        }
+      }
+    }
+  });
+}
+
+export function renderGoalsChallengesChart(canvasId) {
+  if (typeof window.Chart === "undefined") return;
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  const state = store.getState();
+  const tc = getThemeChartColors();
+
+  if (window.goalsChartInstance) {
+    window.goalsChartInstance.destroy();
+  }
+
+  // Accumulate titles for tooltips
+  let gCompleted = [], gInProgress = [], gNotStarted = [];
+  if (state.goals) {
+    state.goals.forEach(g => {
+      if (g.status === "completed") gCompleted.push(g.title);
+      else if (g.status === "in_progress") gInProgress.push(g.title);
+      else gNotStarted.push(g.title);
+    });
+  }
+
+  let cCompleted = [], cInProgress = [], cNotStarted = [];
+  if (state.challenges) {
+    state.challenges.forEach(c => {
+      if (c.completed) cCompleted.push(c.title);
+      else if (c.adopted) cInProgress.push(c.title);
+      else cNotStarted.push(c.title);
+    });
+  }
+
+  // Create Gradients for a premium look
+  const completedGradient = ctx.createLinearGradient(0, 0, 400, 0);
+  completedGradient.addColorStop(0, "#34d399"); // Emerald 400
+  completedGradient.addColorStop(1, "#059669"); // Emerald 600
+
+  const inProgressGradient = ctx.createLinearGradient(0, 0, 400, 0);
+  inProgressGradient.addColorStop(0, "#60a5fa"); // Blue 400
+  inProgressGradient.addColorStop(1, "#2563eb"); // Blue 600
+
+  const notStartedGradient = ctx.createLinearGradient(0, 0, 400, 0);
+  notStartedGradient.addColorStop(0, "#cbd5e1"); // Slate 300
+  notStartedGradient.addColorStop(1, "#94a3b8"); // Slate 400
+
+  // @ts-ignore
+  window.goalsChartInstance = new window.Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Reduction Goals", "Weekly Challenges"],
+      datasets: [
+        {
+          label: "Completed",
+          data: [gCompleted.length, cCompleted.length],
+          itemsList: [gCompleted, cCompleted],
+          backgroundColor: completedGradient,
+          borderRadius: 8,
+          borderSkipped: false,
+          barThickness: 36
+        },
+        {
+          label: "In Progress",
+          data: [gInProgress.length, cInProgress.length],
+          itemsList: [gInProgress, cInProgress],
+          backgroundColor: inProgressGradient,
+          borderRadius: 8,
+          borderSkipped: false,
+          barThickness: 36
+        },
+        {
+          label: "Not Started",
+          data: [gNotStarted.length, cNotStarted.length],
+          itemsList: [gNotStarted, cNotStarted],
+          backgroundColor: notStartedGradient,
+          borderRadius: 8,
+          borderSkipped: false,
+          barThickness: 36
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y', // Makes it horizontal
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { 
+            color: tc.legendColor, 
+            font: { size: 13, weight: "500" },
+            padding: 20,
+            usePointStyle: true,
+            pointStyle: 'circle'
           }
         },
+        tooltip: {
+          backgroundColor: tc.tooltipBg,
+          padding: 12,
+          titleFont: { size: 14, weight: "bold" },
+          bodyFont: { size: 13 },
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} items`,
+            afterLabel: (ctx) => {
+              const items = ctx.dataset.itemsList[ctx.dataIndex];
+              if (items && items.length > 0) {
+                return items.map(item => `  • ${item}`);
+              }
+              return "  (None)";
+            }
+          }
+        }
+      },
+      scales: {
         x: {
-          grid: { display: false },
-          ticks: { color: tc.tickColor }
+          stacked: true,
+          grid: { 
+            color: tc.gridColor,
+            drawBorder: false
+          },
+          ticks: { 
+            color: tc.tickColor,
+            precision: 0,
+            font: { size: 12 }
+          }
+        },
+        y: {
+          stacked: true,
+          grid: { 
+            display: false,
+            drawBorder: false
+          },
+          ticks: { 
+            color: tc.tickColor,
+            font: { size: 14, weight: "600" },
+            padding: 10
+          }
         }
       }
     }

@@ -964,13 +964,24 @@ class CarbonStore {
    */
   getAggregates() {
     const todayStr = new Date().toISOString().split("T")[0];
+    
     const d = new Date();
-    const sevenDaysAgo = new Date(d.setDate(d.getDate() - 7)).toISOString().split("T")[0];
-    d.setDate(d.getDate() + 7); // reset
-    const thirtyDaysAgo = new Date(d.setDate(d.getDate() - 30)).toISOString().split("T")[0];
+    d.setDate(d.getDate() - 1);
+    const yesterdayStr = d.toISOString().split("T")[0];
+
+    d.setDate(d.getDate() + 1 - 7); // reset to today, then -7
+    const sevenDaysAgo = d.toISOString().split("T")[0];
+
+    d.setDate(d.getDate() - 7);
+    const fourteenDaysAgo = d.toISOString().split("T")[0];
+
+    d.setDate(d.getDate() + 14 - 30); // reset to today, then -30
+    const thirtyDaysAgo = d.toISOString().split("T")[0];
 
     let todayCo2 = 0;
+    let yesterdayCo2 = 0;
     let weekCo2 = 0;
+    let priorWeekCo2 = 0;
     let monthCo2 = 0;
     let totalCo2 = 0;
 
@@ -990,10 +1001,16 @@ class CarbonStore {
 
       if (act.date === todayStr) {
         todayCo2 += kg;
+      } else if (act.date === yesterdayStr) {
+        yesterdayCo2 += kg;
       }
+
       if (act.date >= sevenDaysAgo) {
         weekCo2 += kg;
+      } else if (act.date >= fourteenDaysAgo) {
+        priorWeekCo2 += kg;
       }
+
       if (act.date >= thirtyDaysAgo) {
         monthCo2 += kg;
       }
@@ -1016,8 +1033,6 @@ class CarbonStore {
       .sort((a, b) => b.co2eKg - a.co2eKg)
       .slice(0, 4);
 
-    // Sustainability score: Baseline monthly average benchmark ~350kg CO2e
-    // Lower footprint + high streak & completed challenges -> higher score out of 100
     const footprintRatio = Math.min(monthCo2 / 180, 2);
     let baseScore = Math.max(20, Math.round(95 - (footprintRatio * 35)));
     if (this.state.user.streak >= 5) baseScore += 5;
@@ -1025,7 +1040,9 @@ class CarbonStore {
 
     return {
       todayCo2: Number(todayCo2.toFixed(2)),
+      yesterdayCo2: Number(yesterdayCo2.toFixed(2)),
       weekCo2: Number(weekCo2.toFixed(2)),
+      priorWeekCo2: Number(priorWeekCo2.toFixed(2)),
       monthCo2: Number(monthCo2.toFixed(2)),
       totalCo2: Number(totalCo2.toFixed(2)),
       sustainabilityScore,

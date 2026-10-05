@@ -8,7 +8,7 @@ import "./supabaseSync.js"; // Initialize Supabase Optimistic Sync
 import { signOut } from "./auth.js";
 import { EMISSION_FACTORS, getFactorsByCategory, getFactorById } from "./emissionFactors.js";
 import { calculateEmission, formatCarbonWeight } from "./calculator.js";
-import { renderTrendChart, renderCategoryChart, renderAnalyticsChart } from "./charts.js";
+import { renderTrendChart, renderCategoryChart, renderAnalyticsChart, renderGoalsChallengesChart } from "./charts.js";
 import { evaluateAchievements } from "./gamification.js";
 import { getRecommendations } from "./aiCoach.js";
 
@@ -240,6 +240,7 @@ function switchView(viewName) {
   } else if (viewName === "analytics") {
     setTimeout(() => {
       renderAnalyticsChart("analyticsBarCanvas");
+      renderGoalsChallengesChart("goalsChallengesCanvas");
     }, 50);
   } else if (viewName === "goals") {
     updateGoalsUI();
@@ -297,6 +298,53 @@ function updateDashboardUI() {
     kpiMonth.setAttribute("data-val", String(aggregates.monthCo2));
   }
 
+  // KPI Trends
+  const kpiTodayTrend = document.getElementById("kpiTodayTrend");
+  if (kpiTodayTrend) {
+    const diff = aggregates.todayCo2 - aggregates.yesterdayCo2;
+    if (diff > 0.1) {
+      kpiTodayTrend.className = "trend-badge trend-up";
+      kpiTodayTrend.textContent = `↑ ${diff.toFixed(1)} kg`;
+    } else if (diff < -0.1) {
+      kpiTodayTrend.className = "trend-badge trend-down";
+      kpiTodayTrend.textContent = `↓ ${Math.abs(diff).toFixed(1)} kg`;
+    } else {
+      kpiTodayTrend.className = "trend-badge trend-neutral";
+      kpiTodayTrend.textContent = `Even`;
+    }
+  }
+
+  const kpiWeekTrend = document.getElementById("kpiWeekTrend");
+  if (kpiWeekTrend) {
+    if (aggregates.priorWeekCo2 > 0) {
+      const diffPct = ((aggregates.weekCo2 - aggregates.priorWeekCo2) / aggregates.priorWeekCo2) * 100;
+      if (diffPct > 0.5) {
+        kpiWeekTrend.className = "trend-badge trend-up";
+        kpiWeekTrend.textContent = `↑ ${diffPct.toFixed(0)}%`;
+      } else if (diffPct < -0.5) {
+        kpiWeekTrend.className = "trend-badge trend-down";
+        kpiWeekTrend.textContent = `↓ ${Math.abs(diffPct).toFixed(0)}%`;
+      } else {
+        kpiWeekTrend.className = "trend-badge trend-neutral";
+        kpiWeekTrend.textContent = `Even`;
+      }
+    } else {
+      kpiWeekTrend.className = "trend-badge trend-neutral";
+      kpiWeekTrend.textContent = `New`;
+    }
+  }
+
+  const kpiMonthTrend = document.getElementById("kpiMonthTrend");
+  if (kpiMonthTrend) {
+    const target = Math.round(180 * (1 - (state.user.reductionTarget / 100)));
+    if (aggregates.monthCo2 > target) {
+      kpiMonthTrend.className = "trend-badge trend-up";
+    } else {
+      kpiMonthTrend.className = "trend-badge trend-neutral";
+    }
+    kpiMonthTrend.textContent = `Target: <${target} kg`;
+  }
+
   // Sustainability Score Gauge
   const scoreVal = document.getElementById("scoreVal");
   if (scoreVal) {
@@ -310,6 +358,47 @@ function updateDashboardUI() {
     // Circumference = 2 * PI * 40 = 251.2
     const offset = 251.2 - (251.2 * aggregates.sustainabilityScore) / 100;
     scoreRing.style.strokeDashoffset = String(offset);
+  }
+
+  // Analytics View Stat Boxes
+  const analyticsDailyAvgVal = document.getElementById("analyticsDailyAvgVal");
+  if (analyticsDailyAvgVal) {
+    const dailyAvg = state.activities.length > 0 ? aggregates.totalCo2 / Math.max(1, new Set(state.activities.map(a => a.date)).size) : 0;
+    analyticsDailyAvgVal.textContent = dailyAvg.toFixed(2);
+  }
+
+  const analyticsPrimaryCatVal = document.getElementById("analyticsPrimaryCatVal");
+  if (analyticsPrimaryCatVal) {
+    let primaryCat = "N/A";
+    let maxCo2 = 0;
+    for (const [cat, val] of Object.entries(aggregates.categoryBreakdown)) {
+      if (val > maxCo2) {
+        maxCo2 = val;
+        primaryCat = cat;
+      }
+    }
+    analyticsPrimaryCatVal.textContent = primaryCat;
+    analyticsPrimaryCatVal.style.color = `var(--cat-${primaryCat === "N/A" ? "transport" : primaryCat})`;
+  }
+
+  const analyticsGreenShareVal = document.getElementById("analyticsGreenShareVal");
+  if (analyticsGreenShareVal) {
+    const totalActivities = state.activities.length;
+    let greenCount = 0;
+    state.activities.forEach(a => {
+      const type = (a.activityType || "").toLowerCase();
+      if (type.includes("train") || type.includes("bus") || type.includes("walk") || type.includes("bike") || type.includes("vegan") || type.includes("vegetarian")) {
+        greenCount++;
+      }
+    });
+    const share = totalActivities > 0 ? Math.round((greenCount / totalActivities) * 100) : 0;
+    analyticsGreenShareVal.textContent = `${share}%`;
+  }
+
+  const analyticsAnnualVal = document.getElementById("analyticsAnnualVal");
+  if (analyticsAnnualVal) {
+    const annualProjectedTonnes = (aggregates.monthCo2 * 12) / 1000;
+    analyticsAnnualVal.textContent = annualProjectedTonnes.toFixed(1);
   }
 
   // Dynamic Dashboard Banner Description
