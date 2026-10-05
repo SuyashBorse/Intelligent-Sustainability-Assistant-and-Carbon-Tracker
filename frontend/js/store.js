@@ -631,6 +631,20 @@ class CarbonStore {
         });
       }
 
+      // Validate streak logic: Break streak if not logged today or yesterday
+      if (parsed.user && parsed.user.lastLoggedDate) {
+        const todayStr = new Date().toISOString().split("T")[0];
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        if (parsed.user.lastLoggedDate !== todayStr && parsed.user.lastLoggedDate !== yesterdayStr) {
+          if (parsed.user.streak > 0) {
+            parsed.user.streak = 0;
+          }
+        }
+      }
+
       this.saveToRegistry(parsed.user);
       return parsed;
     } catch (e) {
@@ -786,7 +800,17 @@ class CarbonStore {
     // Update streak logic
     const todayStr = new Date().toISOString().split("T")[0];
     if (this.state.user.lastLoggedDate !== todayStr) {
-      this.state.user.streak += 1;
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+      if (this.state.user.lastLoggedDate === yesterdayStr) {
+        // Maintained the streak
+        this.state.user.streak += 1;
+      } else {
+        // Broke the streak (or first time)
+        this.state.user.streak = 1;
+      }
       this.state.user.lastLoggedDate = todayStr;
     }
 
