@@ -976,3 +976,19 @@ button, input, select, textarea {
     padding: 1rem;
   }
 }
+
+@media (max-width: 480px) {
+  .app-topbar .btn-open-log-modal span {
+    display: none;
+  }
+  .app-topbar .btn-open-log-modal {
+    padding: 0.4rem;
+  }
+  .app-topbar {
+    padding: 0 1rem;
+  }
+  .page-breadcrumb {
+    font-size: 0.8rem;
+  }
+}
+
