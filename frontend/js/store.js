@@ -215,7 +215,7 @@ const INITIAL_STATE = {
     preferredUnit: "kg",
     reductionTarget: 20, // percentage
     points: 385,
-    streak: 6,
+    streak: 10,
     lastLoggedDate: getPastDate(0)
   },
   activities: [
@@ -337,6 +337,42 @@ const INITIAL_STATE = {
       co2eKg: 1.50,
       date: getPastDate(6),
       notes: "Full vegan weekend day",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "act_111",
+      category: "energy",
+      activityType: "Grid Electricity",
+      quantity: 12.0,
+      unit: "kWh",
+      emissionFactorId: "ef_energy_grid",
+      co2eKg: 5.04,
+      date: getPastDate(7),
+      notes: "Standard daily electricity",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "act_112",
+      category: "transportation",
+      activityType: "Car (Petrol / Gasoline)",
+      quantity: 10,
+      unit: "km",
+      emissionFactorId: "ef_trans_car_petrol",
+      co2eKg: 2.10,
+      date: getPastDate(8),
+      notes: "Short trip to grocery store",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "act_113",
+      category: "water",
+      activityType: "Hot Shower (8-10 mins)",
+      quantity: 1,
+      unit: "showers",
+      emissionFactorId: "ef_water_shower",
+      co2eKg: 0.85,
+      date: getPastDate(9),
+      notes: "Morning shower",
       createdAt: new Date().toISOString()
     }
   ],
