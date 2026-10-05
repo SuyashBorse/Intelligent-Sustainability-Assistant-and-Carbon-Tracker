@@ -907,3 +907,10 @@
   }
 }
 
+
+@media (max-width: 480px) {
+  .streak-count-hero {
+    font-size: 2rem;
+  }
+}
+
