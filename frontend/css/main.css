@@ -1010,3 +1010,8 @@ button, input, select, textarea {
   }
 }
 
+
+.streak-pill, .points-pill {
+  white-space: nowrap;
+}
+
