@@ -7,6 +7,11 @@ A modern, responsive carbon footprint tracking web application with interactive 
 ## 📁 Project Structure
 
 ```text
+├── backend/                      # Backend & Database Configurations
+│   └── database/
+│       ├── schema.sql            # PostgreSQL schema definitions
+│       └── DATABASE_SCHEMA.md    # Schema documentation & RLS policies
+│
 ├── frontend/                     # Web Application Frontend
 │   ├── index.html                # Main application workspace & views
 │   ├── login.html                # Sign-in portal
@@ -27,7 +32,6 @@ A modern, responsive carbon footprint tracking web application with interactive 
 ├── documents/                    # Architectural Specifications & Documentation
 │   ├── PRD.md                    # Product Requirements Document
 │   ├── ARCHITECTURE.md           # System architecture and technical design
-│   ├── DATABASE_SCHEMA.md        # PostgreSQL/Supabase schema & RLS
 │   ├── AI_GEMINI_SPEC.md         # Gemini integration & prompt specifications
 │   ├── UI_UX_SPEC.md             # UI/UX design tokens & responsive specifications
 │   ├── EMISSION_CALCULATION_SPEC.md # GHG Protocol calculation formulas
@@ -35,12 +39,20 @@ A modern, responsive carbon footprint tracking web application with interactive 
 │   ├── API_SPEC.md               # API & Edge Function endpoint interfaces
 │   ├── GAMIFICATION_SPEC.md      # Points, badges, challenges & streaks
 │   ├── TEST_PLAN.md              # Automated & manual test scenarios
-│   ├── IMPLEMENTATION_PLAN.md    # Phased rollout and milestones
-│   └── ANTIGRAVITY_MASTER_PROMPT.md # Antigravity coding instructions
+│   └── IMPLEMENTATION_PLAN.md    # Phased rollout and milestones
 │
 ├── package.json                  # Node dependencies & Vite scripts
 └── README.md                     # Repository overview & setup guide
 ```
+
+---
+
+## 🌟 Recent Updates (October 2026)
+- **100% Mobile Responsiveness:** Enforced strict CSS boundaries, overflowing layout grids, and scalable topbar pills to guarantee a perfect layout on any mobile device.
+- **Dynamic Analytics & Charts:** Upgraded the Analytics UI to feature a beautiful Polar Area chart and a custom horizontal stacked bar chart for visualizing dynamic goals & challenges progress with hover states.
+- **Strict Gamification Engine:** Rewrote the streak engine to dynamically recalculate valid streaks directly from historical activity data, strictly enforcing the 24-hour activity rule.
+- **Real-Time Data Driven UI:** Converted all remaining hardcoded placeholders (KPI trend badges, sustainability score percentile text, streak bonus targets) to dynamically compute from real user data.
+- **Robust Demo Profile:** The pre-seeded demo user now comes with a rich 10-day activity history, perfect for showcasing the complete dashboard analytics and active gamification streaks immediately upon clone.
 
 ---
 
@@ -62,6 +74,6 @@ Serves the `frontend/` directory at `http://localhost:3000/`.
 ## 🛠️ Tech Stack
 - **Frontend**: HTML5, CSS3 Variables, Vanilla ES Modules, Chart.js
 - **Development**: Vite (ESM Dev Server)
-- **Backend / DB (Target)**: Supabase, PostgreSQL, Edge Functions
+- **Backend / DB**: Supabase, PostgreSQL, Edge Functions (configured in `backend/`)
 - **AI Integration**: Google Gemini API (Personalized decarbonization recommendations)
 
