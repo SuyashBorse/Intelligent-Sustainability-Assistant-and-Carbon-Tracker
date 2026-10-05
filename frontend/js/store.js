@@ -631,17 +631,39 @@ class CarbonStore {
         });
       }
 
-      // Validate streak logic: Break streak if not logged today or yesterday
-      if (parsed.user && parsed.user.lastLoggedDate) {
-        const todayStr = new Date().toISOString().split("T")[0];
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split("T")[0];
+      if (parsed.user) {
+        // Recalculate true streak dynamically based on actual logged activities
+        const uniqueDates = new Set(
+          (parsed.activities || []).map(a => a.date).filter(Boolean)
+        );
+        
+        let currentStreak = 0;
+        let checkDate = new Date();
+        
+        // Start checking from today
+        let checkStr = checkDate.toISOString().split("T")[0];
+        
+        // If today is not logged, check if yesterday is logged
+        if (!uniqueDates.has(checkStr)) {
+          checkDate.setDate(checkDate.getDate() - 1);
+          checkStr = checkDate.toISOString().split("T")[0];
+        }
 
-        if (parsed.user.lastLoggedDate !== todayStr && parsed.user.lastLoggedDate !== yesterdayStr) {
-          if (parsed.user.streak > 0) {
-            parsed.user.streak = 0;
-          }
+        // Count consecutive days going backward
+        while (uniqueDates.has(checkStr)) {
+          currentStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+          checkStr = checkDate.toISOString().split("T")[0];
+        }
+
+        parsed.user.streak = currentStreak;
+        
+        // Ensure lastLoggedDate is accurate to the most recent log
+        const sortedDates = Array.from(uniqueDates).sort((a, b) => b.localeCompare(a));
+        if (sortedDates.length > 0) {
+          parsed.user.lastLoggedDate = sortedDates[0];
+        } else {
+          parsed.user.lastLoggedDate = null;
         }
       }
 
