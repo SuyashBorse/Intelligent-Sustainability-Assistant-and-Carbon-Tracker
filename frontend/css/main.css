@@ -1015,3 +1015,9 @@ button, input, select, textarea {
   white-space: nowrap;
 }
 
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
