@@ -262,12 +262,12 @@
                   </svg>
                   <div class="score-number">
                     <span id="scoreVal">84</span>
-                    <small>Top 15%</small>
+                    <small id="scorePercentile">Top 15%</small>
                   </div>
                 </div>
                 <div style="font-size: 0.82rem; color: var(--text-secondary);">
-                  <strong style="color: var(--primary-dark); display: block; margin-bottom: 2px;">Great Performance!</strong>
-                  Ahead of regional average by 18%.
+                  <strong id="scoreFeedbackTitle" style="color: var(--primary-dark); display: block; margin-bottom: 2px;">Great Performance!</strong>
+                  <span id="scoreFeedbackDesc">Ahead of regional average by 18%.</span>
                 </div>
               </div>
             </div>
@@ -474,7 +474,7 @@
             <div class="streak-card-display">
               <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #fed7aa; font-weight: 700;">Current Streak</div>
               <div class="streak-count-hero" id="heroStreakCount">6 🔥</div>
-              <div style="font-size: 0.8rem; color: #fed7aa; margin-top: 0.25rem;">+30 pts bonus at 7 days!</div>
+              <div id="heroStreakBonus" style="font-size: 0.8rem; color: #fed7aa; margin-top: 0.25rem;">+30 pts bonus at 7 days!</div>
             </div>
           </div>
 

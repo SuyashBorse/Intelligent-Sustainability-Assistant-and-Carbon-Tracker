@@ -360,6 +360,35 @@ function updateDashboardUI() {
     scoreRing.style.strokeDashoffset = String(offset);
   }
 
+  const scorePercentile = document.getElementById("scorePercentile");
+  const scoreFeedbackTitle = document.getElementById("scoreFeedbackTitle");
+  const scoreFeedbackDesc = document.getElementById("scoreFeedbackDesc");
+
+  if (scorePercentile && scoreFeedbackTitle && scoreFeedbackDesc) {
+    const score = aggregates.sustainabilityScore;
+    if (score >= 90) {
+      scorePercentile.textContent = "Top 5%";
+      scoreFeedbackTitle.textContent = "Exceptional Performance!";
+      scoreFeedbackTitle.style.color = "var(--primary-dark)";
+      scoreFeedbackDesc.textContent = "Ahead of regional average by >30%.";
+    } else if (score >= 75) {
+      scorePercentile.textContent = "Top 20%";
+      scoreFeedbackTitle.textContent = "Great Performance!";
+      scoreFeedbackTitle.style.color = "var(--primary-dark)";
+      scoreFeedbackDesc.textContent = "Ahead of regional average by ~15%.";
+    } else if (score >= 50) {
+      scorePercentile.textContent = "Top 50%";
+      scoreFeedbackTitle.textContent = "On Track";
+      scoreFeedbackTitle.style.color = "var(--text-main)";
+      scoreFeedbackDesc.textContent = "Consistent with regional averages.";
+    } else {
+      scorePercentile.textContent = "Bottom 50%";
+      scoreFeedbackTitle.textContent = "Needs Improvement";
+      scoreFeedbackTitle.style.color = "var(--cat-food)";
+      scoreFeedbackDesc.textContent = "Higher than regional average footprint.";
+    }
+  }
+
   // Analytics View Stat Boxes
   const analyticsDailyAvgVal = document.getElementById("analyticsDailyAvgVal");
   if (analyticsDailyAvgVal) {
@@ -480,6 +509,13 @@ function updateGamificationUI() {
 
   const heroStreak = document.getElementById("heroStreakCount");
   if (heroStreak) heroStreak.innerHTML = `${state.user.streak} <span>🔥</span>`;
+
+  const heroStreakBonus = document.getElementById("heroStreakBonus");
+  if (heroStreakBonus) {
+    const nextMilestone = Math.ceil((state.user.streak + 1) / 7) * 7;
+    const daysLeft = nextMilestone - state.user.streak;
+    heroStreakBonus.textContent = `+30 pts bonus in ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}!`;
+  }
 
   const heroPoints = document.getElementById("heroPointsCount");
   if (heroPoints) {
