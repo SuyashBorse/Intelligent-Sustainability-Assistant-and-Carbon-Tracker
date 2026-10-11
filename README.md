@@ -2,7 +2,6 @@
 
 An intelligent, full-featured personal carbon footprint tracking web application with interactive greenhouse gas (GHG) emission calculators, dynamic Chart.js analytics, real-time gamification streaks, and Google Gemini AI sustainability coaching.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Vite](https://img.shields.io/badge/bundler-Vite_5.4-646CFF.svg)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/backend-Supabase_PostgreSQL-3ECF8E.svg)](https://supabase.com/)
 [![Chart.js](https://img.shields.io/badge/visualizations-Chart.js_4.4-FF6384.svg)](https://www.chartjs.org/)
@@ -201,9 +200,3 @@ Comprehensive architectural and engineering specifications are available in the 
 - [Gamification Engine Specification](documents/GAMIFICATION_SPEC.md)
 - [Test Plan & Test Cases](documents/TEST_PLAN.md)
 - [Implementation Plan & Milestones](documents/IMPLEMENTATION_PLAN.md)
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
