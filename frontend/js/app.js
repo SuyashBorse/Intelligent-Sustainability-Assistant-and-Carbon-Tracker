@@ -462,6 +462,17 @@ function updateDashboardUI() {
     `).join("") || `<p class="form-hint" style="padding: 1rem;">No activities logged yet.</p>`;
   }
 
+  // Dynamic Eco Insight Banner below Top Contributors
+  const ecoDynamicText = document.getElementById("ecoBannerDynamicText");
+  if (ecoDynamicText) {
+    if (aggregates.topContributors && aggregates.topContributors.length > 0) {
+      const topOne = aggregates.topContributors[0];
+      ecoDynamicText.innerHTML = `Targeting <strong>${topOne.activity}</strong> (${topOne.co2eKg} kg CO₂e) with simple daily adjustments can lower your footprint significantly.`;
+    } else {
+      ecoDynamicText.textContent = "Log your daily activities to uncover your top carbon drivers and unlock smart reduction actions.";
+    }
+  }
+
   // Active Goals (Dashboard & Goals View)
   updateGoalsUI();
 

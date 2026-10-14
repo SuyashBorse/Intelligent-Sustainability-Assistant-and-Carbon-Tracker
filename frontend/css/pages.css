@@ -167,6 +167,101 @@
   color: var(--text-muted);
 }
 
+/* Illustrated Eco-Insight Banner */
+.eco-illustration-banner {
+  margin-top: 1.25rem;
+  padding: 1.15rem 1.25rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.03) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all var(--trans-fast);
+}
+
+.eco-illustration-banner:hover {
+  border-color: rgba(16, 185, 129, 0.38);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.09);
+}
+
+.eco-banner-graphic {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eco-banner-svg {
+  display: block;
+  width: 108px;
+  height: auto;
+  filter: drop-shadow(0 4px 8px rgba(16, 185, 129, 0.15));
+}
+
+.eco-banner-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.eco-banner-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  margin-bottom: 0.3rem;
+}
+
+.eco-banner-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.35rem 0;
+  line-height: 1.25;
+}
+
+.eco-banner-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0 0 0.75rem 0;
+}
+
+.eco-banner-btn {
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  padding: 0.35rem 0.85rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  border-radius: var(--radius-full) !important;
+  border-color: rgba(16, 185, 129, 0.32) !important;
+  color: var(--primary-dark) !important;
+  background: var(--surface) !important;
+  cursor: pointer !important;
+  transition: all var(--trans-fast) !important;
+}
+
+.eco-banner-btn:hover {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 520px) {
+  .eco-illustration-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+}
+
 /* Active Goals Progress Widget */
 .goal-progress-list {
   display: flex;
@@ -845,6 +940,31 @@
   color: #34d399 !important;
   background: rgba(16, 185, 129, 0.12) !important;
   border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+[data-theme="dark"] .eco-illustration-banner {
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.35) 0%, rgba(15, 23, 42, 0.6) 100%);
+  border-color: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .eco-banner-title {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .eco-banner-text {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .eco-banner-btn {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .eco-banner-btn:hover {
+  background: var(--primary) !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .goal-filter-btn {
