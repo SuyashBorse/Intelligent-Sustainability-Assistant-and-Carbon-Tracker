@@ -1626,6 +1626,10 @@ async function loadAICoachRecommendations(promptTopic = null) {
   const summaryBox = document.getElementById("aiSummaryBox");
   if (!deck) return;
 
+  if (summaryBox) {
+    summaryBox.style.display = "none";
+  }
+
   deck.innerHTML = `
     <div style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
       <div style="font-size: 1.5rem; margin-bottom: 0.5rem; animation: spin 1s linear infinite;">⏳</div>
@@ -1637,6 +1641,7 @@ async function loadAICoachRecommendations(promptTopic = null) {
     const data = await getRecommendations(promptTopic);
     
     if (summaryBox) {
+      summaryBox.style.display = "block";
       summaryBox.innerHTML = `
         <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
           <span style="font-size: 1.5rem;">🤖</span>

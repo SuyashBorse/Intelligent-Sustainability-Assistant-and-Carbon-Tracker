@@ -148,11 +148,17 @@ export async function getRecommendations(customTopic = null) {
     payload.custom_focus = customTopic;
   }
 
-  // 1. Attempt calling Supabase Edge Function
+  // 1. Attempt calling Supabase Edge Function with a 6-second timeout
   try {
-    const { data, error } = await supabase.functions.invoke("generate-recommendations", {
+    const invokePromise = supabase.functions.invoke("generate-recommendations", {
       body: payload
     });
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Edge Function invocation timed out")), 6000)
+    );
+
+    const { data, error } = await Promise.race([invokePromise, timeoutPromise]);
 
     if (!error && data && validateGeminiResponse(data)) {
       // If user is authenticated in Supabase, persist recommendations in PostgreSQL
@@ -186,7 +192,7 @@ export async function getRecommendations(customTopic = null) {
   }
 
   // Brief pause for UI smoothness before rendering fallback
-  await new Promise(resolve => setTimeout(resolve, 400));
+  await new Promise(resolve => setTimeout(resolve, 300));
 
   // 2. Return validated fallback recommendations
   return generateFallbackRecommendations(payload, customTopic);
