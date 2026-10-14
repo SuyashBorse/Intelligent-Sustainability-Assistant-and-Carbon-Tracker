@@ -169,14 +169,15 @@
 
 /* Illustrated Eco-Insight Banner */
 .eco-illustration-banner {
-  margin-top: 1.25rem;
-  padding: 1.15rem 1.25rem;
+  margin-top: 1.1rem;
+  padding: 1.25rem 1.35rem;
   border-radius: var(--radius-lg);
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.03) 100%);
   border: 1px solid rgba(16, 185, 129, 0.22);
   display: flex;
-  align-items: center;
-  gap: 1.25rem;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
   transition: all var(--trans-fast);
 }
@@ -184,6 +185,12 @@
 .eco-illustration-banner:hover {
   border-color: rgba(16, 185, 129, 0.38);
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.09);
+}
+
+.eco-banner-top-row {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
 }
 
 .eco-banner-graphic {
@@ -195,7 +202,7 @@
 
 .eco-banner-svg {
   display: block;
-  width: 108px;
+  width: 100px;
   height: auto;
   filter: drop-shadow(0 4px 8px rgba(16, 185, 129, 0.15));
 }
@@ -214,28 +221,54 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--primary);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.25rem;
 }
 
 .eco-banner-title {
   font-size: 0.98rem;
   font-weight: 700;
   color: var(--text-main);
-  margin: 0 0 0.35rem 0;
+  margin: 0 0 0.25rem 0;
   line-height: 1.25;
 }
 
 .eco-banner-text {
-  font-size: 0.82rem;
+  font-size: 0.81rem;
   color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.eco-equivalency-strip {
+  margin: 0.85rem 0;
+  padding: 0.65rem 0.95rem;
+  border-radius: var(--radius-md);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px dashed rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.79rem;
+  color: var(--text-main);
   line-height: 1.45;
-  margin: 0 0 0.75rem 0;
+}
+
+.eco-equivalency-strip strong {
+  color: var(--primary-dark);
+}
+
+.eco-banner-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.25rem;
 }
 
 .eco-banner-btn {
   font-size: 0.78rem !important;
   font-weight: 600 !important;
-  padding: 0.35rem 0.85rem !important;
+  padding: 0.38rem 0.85rem !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 0.35rem !important;
@@ -255,7 +288,7 @@
 }
 
 @media (max-width: 520px) {
-  .eco-illustration-banner {
+  .eco-banner-top-row {
     flex-direction: column;
     text-align: center;
     gap: 0.75rem;
@@ -954,6 +987,16 @@
 
 [data-theme="dark"] .eco-banner-text {
   color: #94a3b8;
+}
+
+[data-theme="dark"] .eco-equivalency-strip {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .eco-equivalency-strip strong {
+  color: #34d399 !important;
 }
 
 [data-theme="dark"] .eco-banner-btn {

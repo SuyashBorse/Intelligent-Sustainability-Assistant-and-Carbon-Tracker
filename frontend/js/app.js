@@ -467,9 +467,24 @@ function updateDashboardUI() {
   if (ecoDynamicText) {
     if (aggregates.topContributors && aggregates.topContributors.length > 0) {
       const topOne = aggregates.topContributors[0];
-      ecoDynamicText.innerHTML = `Targeting <strong>${topOne.activity}</strong> (${topOne.co2eKg} kg CO₂e) with simple daily adjustments can lower your footprint significantly.`;
+      ecoDynamicText.innerHTML = `Your #1 footprint driver is <strong>${topOne.activity}</strong> (${topOne.co2eKg} kg CO₂e, ${topOne.percentage}% of emissions).`;
     } else {
       ecoDynamicText.textContent = "Log your daily activities to uncover your top carbon drivers and unlock smart reduction actions.";
+    }
+  }
+
+  // Real-World Environmental Equivalency calculation
+  const ecoEquivEl = document.getElementById("ecoEquivalencyContent");
+  if (ecoEquivEl) {
+    const totalMonthKg = Number(aggregates.monthCo2) || 0;
+    if (totalMonthKg > 0) {
+      // 1 mature tree absorbs ~21.77 kg CO2 / year (IPCC/EPA benchmark)
+      const treesNeeded = Math.max(1, Math.round(totalMonthKg / 21.77));
+      // Average gasoline passenger car emits ~0.21 kg CO2e / km
+      const carKm = Math.round(totalMonthKg / 0.21);
+      ecoEquivEl.innerHTML = `Your footprint requires <strong>${treesNeeded} mature ${treesNeeded === 1 ? 'tree' : 'trees'}</strong> for 1 yr to absorb • Equal to <strong>${carKm.toLocaleString()} km</strong> driven by car`;
+    } else {
+      ecoEquivEl.innerHTML = `Track your commutes, meals, and utilities to view real-world carbon equivalencies.`;
     }
   }
 

@@ -1118,7 +1118,7 @@ class CarbonStore {
       contributorMap[act.activityType] = (contributorMap[act.activityType] || 0) + kg;
     });
 
-    // Top 4 contributors ranked
+    // Top 5 contributors ranked
     const topContributors = Object.keys(contributorMap)
       .map(activity => ({
         activity,
@@ -1126,7 +1126,7 @@ class CarbonStore {
         percentage: totalCo2 > 0 ? Math.round((contributorMap[activity] / totalCo2) * 100) : 0
       }))
       .sort((a, b) => b.co2eKg - a.co2eKg)
-      .slice(0, 4);
+      .slice(0, 5);
 
     const footprintRatio = Math.min(monthCo2 / 180, 2);
     let baseScore = Math.max(20, Math.round(95 - (footprintRatio * 35)));
