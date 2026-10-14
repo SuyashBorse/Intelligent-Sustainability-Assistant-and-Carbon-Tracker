@@ -4,7 +4,7 @@
  */
 
 import { store } from "./store.js";
-import "./supabaseSync.js"; // Initialize Supabase Optimistic Sync
+import { hydrateStoreFromSupabase } from "./supabaseSync.js"; // Initialize Supabase Optimistic Sync
 import { signOut } from "./auth.js";
 import { EMISSION_FACTORS, getFactorsByCategory, getFactorById } from "./emissionFactors.js";
 import { calculateEmission, formatCarbonWeight } from "./calculator.js";
@@ -1712,8 +1712,11 @@ export function closeActivityModal() {
 
 // ==========================================================================
 // AI Sustainability Coach UI
-// ==========================================================================
+// Track AI Coach request sequencing to prevent race conditions during auth switches
+let aiCoachRequestId = 0;
+
 async function loadAICoachRecommendations(promptTopic = null) {
+  const currentReqId = ++aiCoachRequestId;
   const deck = document.getElementById("aiRecommendationsDeck");
   const summaryBox = document.getElementById("aiSummaryBox");
   if (!deck) return;
@@ -1731,6 +1734,9 @@ async function loadAICoachRecommendations(promptTopic = null) {
 
   try {
     const data = await getRecommendations(promptTopic);
+    
+    // Guard against race conditions: if another newer request started, discard stale response
+    if (currentReqId !== aiCoachRequestId) return;
     
     if (summaryBox) {
       summaryBox.style.display = "block";
@@ -1964,7 +1970,7 @@ function initThemeToggle() {
 // ==========================================================================
 // Initialization & Global Event Listeners
 // ==========================================================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // Initialize responsive sidebar & theme toggle
   initSidebarControls();
   initThemeToggle();
@@ -2037,10 +2043,38 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCreateGoalModal();
   setupChallengeProgressModal();
   setupProfileHandlers();
+
+  // 1. Immediate optimistic render from local storage (avoids layout jump)
   updateUserProfileUI();
   updateDashboardUI();
   renderTrendChart("trendChartCanvas", "7d");
   renderCategoryChart("categoryChartCanvas");
+
+  // Show syncing placeholder in the AI recommendations deck
+  const initialDeck = document.getElementById("aiRecommendationsDeck");
+  if (initialDeck) {
+    initialDeck.innerHTML = `
+      <div style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+        <div style="font-size: 1.5rem; margin-bottom: 0.5rem; animation: spin 1s linear infinite;">⏳</div>
+        <strong>Syncing account & analyzing carbon history with Gemini...</strong>
+      </div>
+    `;
+  }
+
+  // 2. Await cloud synchronization from Supabase so the real user's actual activities are 100% loaded!
+  try {
+    await hydrateStoreFromSupabase();
+  } catch (syncErr) {
+    console.warn("Initial Supabase cloud hydration warning:", syncErr);
+  }
+
+  // 3. Re-render UI with freshly hydrated data
+  updateUserProfileUI();
+  updateDashboardUI();
+  renderTrendChart("trendChartCanvas", activeTrendFilter);
+  renderCategoryChart("categoryChartCanvas");
+
+  // 4. NOW load Gemini recommendations tailored to this authenticated user's real activities!
   loadAICoachRecommendations();
 
   // Delegated click handler for Goal & Challenge Progress Buttons
@@ -2124,6 +2158,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (analyticsCanvas && analyticsCanvas.offsetParent !== null) {
       renderAnalyticsChart("analyticsBarCanvas");
     }
+  });
+
+  // Automatically reconfigure UI & Gemini coach whenever an account is switched or signed in
+  window.addEventListener("ecotrack_account_switched", async () => {
+    updateUserProfileUI();
+    updateDashboardUI();
+    renderTrendChart("trendChartCanvas", activeTrendFilter);
+    renderCategoryChart("categoryChartCanvas");
+    await loadAICoachRecommendations();
   });
 });
 

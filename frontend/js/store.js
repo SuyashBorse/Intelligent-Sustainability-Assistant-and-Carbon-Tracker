@@ -808,7 +808,13 @@ class CarbonStore {
    * Log out active session
    */
   logout() {
-    localStorage.removeItem("ecotrack_current_user");
+    try {
+      localStorage.removeItem("ecotrack_current_user");
+      localStorage.removeItem(ACTIVE_EMAIL_KEY);
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem("ecotrack_state_v1");
+    } catch (e) {}
+    this.state = JSON.parse(JSON.stringify(INITIAL_STATE));
     this.dispatchChange();
   }
 

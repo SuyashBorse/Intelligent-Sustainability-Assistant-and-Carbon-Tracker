@@ -3,83 +3,107 @@ import { store } from './store.js';
 
 // Optimistic UI Sync Manager for Supabase
 
-export async function hydrateStoreFromSupabase() {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    
-    const user = session.user;
-    
-    // Switch local store to the authenticated user's profile
-    store.switchAccount(user.email, user.user_metadata?.full_name || user.email);
-    
-    // Fetch all user data concurrently
-    const [
-      { data: profile },
-      { data: activities },
-      { data: goals }
-    ] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
-      supabase.from('activity_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-      supabase.from('goals').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
-    ]);
-    
-    if (profile) {
-      store.state.user.points = profile.points || 0;
-      store.state.user.streak = profile.streak || 0;
-      store.state.user.name = profile.full_name || store.state.user.name;
-    }
-    
-    if (activities) {
-      store.state.activities = activities.map(a => ({
-        id: a.id,
-        category: a.category,
-        activityType: a.activity_type,
-        quantity: a.quantity,
-        unit: a.unit,
-        emissionFactorId: a.emission_factor_id,
-        co2eKg: a.co2e_kg,
-        date: a.activity_date,
-        notes: a.notes,
-        createdAt: a.created_at
-      }));
-    }
-    
-    if (goals && goals.length > 0) {
-      store.state.goals = goals.map(g => ({
-        id: g.id,
-        title: g.title,
-        description: g.description,
-        targetCo2eReductionKg: g.target_co2e_reduction,
-        targetDate: g.target_date,
-        currentProgressPercent: g.current_progress,
-        status: g.status,
-        category: g.category,
-        createdAt: g.created_at
-      }));
-    } else if (goals && goals.length === 0 && store.state.goals.length > 0) {
-      store.state.goals.forEach(goal => {
-        supabase.from('goals').insert({
-          id: goal.id,
-          user_id: user.id,
-          title: goal.title,
-          description: goal.description,
-          target_co2e_reduction: goal.targetCo2eReductionKg,
-          target_date: goal.targetDate,
-          current_progress: goal.currentProgressPercent,
-          status: goal.status,
-          category: goal.category,
-          created_at: goal.createdAt
-        }).then(() => {});
-      });
-    }
-    
-    // Save to local and trigger UI update
-    store.saveState();
-    
-  } catch (err) {
-    console.error("Failed to hydrate from Supabase:", err);
+let activeHydrationPromise = null;
+
+export function hydrateStoreFromSupabase(force = false) {
+  if (activeHydrationPromise && !force) {
+    return activeHydrationPromise;
   }
+
+  activeHydrationPromise = (async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+      
+      const user = session.user;
+      
+      // Switch local store to the authenticated user's profile
+      store.switchAccount(user.email, user.user_metadata?.full_name || user.email);
+      
+      // Fetch all user data concurrently
+      const [
+        { data: profile },
+        { data: activities },
+        { data: goals }
+      ] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+        supabase.from('activity_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('goals').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+      ]);
+      
+      if (profile) {
+        store.state.user.points = profile.points || 0;
+        store.state.user.streak = profile.streak || 0;
+        store.state.user.name = profile.full_name || store.state.user.name;
+      }
+      
+      if (activities) {
+        store.state.activities = activities.map(a => ({
+          id: a.id,
+          category: a.category,
+          activityType: a.activity_type,
+          quantity: a.quantity,
+          unit: a.unit,
+          emissionFactorId: a.emission_factor_id,
+          co2eKg: a.co2e_kg,
+          date: a.activity_date,
+          notes: a.notes,
+          createdAt: a.created_at
+        }));
+      }
+      
+      if (goals && goals.length > 0) {
+        store.state.goals = goals.map(g => ({
+          id: g.id,
+          title: g.title,
+          description: g.description,
+          targetCo2eReductionKg: g.target_co2e_reduction,
+          targetDate: g.target_date,
+          currentProgressPercent: g.current_progress,
+          status: g.status,
+          category: g.category,
+          createdAt: g.created_at
+        }));
+      } else if (goals && goals.length === 0 && store.state.goals.length > 0) {
+        store.state.goals.forEach(goal => {
+          supabase.from('goals').insert({
+            id: goal.id,
+            user_id: user.id,
+            title: goal.title,
+            description: goal.description,
+            target_co2e_reduction: goal.targetCo2eReductionKg,
+            target_date: goal.targetDate,
+            current_progress: goal.currentProgressPercent,
+            status: goal.status,
+            category: goal.category,
+            created_at: goal.createdAt
+          }).then(() => {});
+        });
+      }
+      
+      // Save to local and trigger UI update
+      store.saveState();
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("ecotrack_hydrated", {
+          detail: {
+            user,
+            email: user.email,
+            activityCount: store.state.activities.length
+          }
+        }));
+      }
+
+      return { user, activityCount: store.state.activities.length };
+    } catch (err) {
+      console.error("Failed to hydrate from Supabase:", err);
+      return null;
+    } finally {
+      activeHydrationPromise = null;
+    }
+  })();
+
+  return activeHydrationPromise;
 }
 
 // Intercept Store Mutators to sync to Supabase in background
@@ -198,10 +222,22 @@ function syncProfile(userId) {
     .then(({error}) => { if(error) console.error("Sync error:", error); });
 }
 
-// Initial hook
-supabase.auth.onAuthStateChange((event, session) => {
+// Real-time Auth state change hook
+supabase.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN') {
-    hydrateStoreFromSupabase();
+    await hydrateStoreFromSupabase(true);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("ecotrack_account_switched", {
+        detail: { session, email: session?.user?.email }
+      }));
+    }
+  } else if (event === 'SIGNED_OUT') {
+    store.logout();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("ecotrack_account_switched", {
+        detail: { session: null, email: null }
+      }));
+    }
   }
 });
 
