@@ -540,7 +540,7 @@ function updateGamificationUI() {
         <div class="challenge-card ${isCompleted ? 'completed' : isAdopted ? 'adopted' : ''}" data-challenge-id="${c.id}">
           <div>
             <div class="challenge-top">
-              <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+              <div class="challenge-top-badges">
                 <span class="badge badge-${c.category}">${c.category}</span>
                 ${isCompleted 
                   ? `<span class="badge badge-completed">✓ Completed</span>` 
@@ -549,7 +549,10 @@ function updateGamificationUI() {
                   : `<span class="badge badge-not-started">Available</span>`
                 }
               </div>
-              <span class="challenge-points-chip">+${c.points} pts</span>
+              <span class="challenge-points-chip">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6.1 4.5 2.3 7.1-6.2-4.5-6.2 4.5 2.3-7.1-6.1-4.5h7.6z"/></svg>
+                <span>+${c.points} pts</span>
+              </span>
             </div>
             <h4 style="margin: 0.75rem 0 0.25rem;">${c.title}</h4>
             <p style="font-size: 0.82rem; color: var(--text-muted);">${c.description}</p>
@@ -564,7 +567,7 @@ function updateGamificationUI() {
               <span class="badge badge-${c.difficulty}">${c.difficulty}</span>
             </div>
             ${isCompleted 
-              ? `<button class="btn btn-secondary btn-sm btn-block" disabled style="color: var(--primary); font-weight: 700; background: #ecfdf5; border-color: #a7f3d0;">✓ Completed (+${c.points} pts)</button>`
+              ? `<button class="btn btn-challenge-completed btn-sm btn-block" disabled>✓ Completed (+${c.points} pts)</button>`
               : !isAdopted
               ? `<button class="btn btn-primary btn-sm btn-block btn-adopt-challenge" data-id="${c.id}" style="font-weight: 600;">🎯 Adopt Challenge</button>`
               : `
@@ -1135,7 +1138,9 @@ function openChallengeProgressModal(challengeId) {
   if (targetIdInput) targetIdInput.value = challenge.id;
   if (nameEl) nameEl.textContent = challenge.title;
   if (descEl) descEl.textContent = challenge.description;
-  if (pointsBadge) pointsBadge.textContent = `+${challenge.points} pts`;
+  if (pointsBadge) {
+    pointsBadge.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6.1 4.5 2.3 7.1-6.2-4.5-6.2 4.5 2.3-7.1-6.1-4.5h7.6z"/></svg><span>+${challenge.points} pts</span>`;
+  }
   if (catBadge) {
     catBadge.className = `badge badge-${challenge.category}`;
     catBadge.textContent = challenge.category;

@@ -521,19 +521,56 @@
 
 .challenge-top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.6rem;
+  margin-bottom: 0.25rem;
+}
+
+.challenge-top-badges {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .challenge-points-chip {
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  color: #ea580c;
-  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 26px;
+  padding: 0 0.65rem;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  color: #b45309;
+  font-weight: 700;
   font-size: 0.78rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: var(--radius-full);
+  line-height: 1;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(245, 158, 11, 0.08);
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+
+.challenge-points-chip svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.btn-challenge-completed {
+  color: var(--primary-dark) !important;
+  font-weight: 700 !important;
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  cursor: default !important;
+  opacity: 0.95;
 }
 
 .badges-grid {
@@ -795,6 +832,19 @@
 [data-theme="dark"] .challenge-card.completed {
   border-color: #059669;
   background: rgba(16, 185, 129, 0.08);
+}
+
+[data-theme="dark"] .challenge-points-chip {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.32) !important;
+  color: #fbbf24 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .btn-challenge-completed {
+  color: #34d399 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
 }
 
 [data-theme="dark"] .goal-filter-btn {
