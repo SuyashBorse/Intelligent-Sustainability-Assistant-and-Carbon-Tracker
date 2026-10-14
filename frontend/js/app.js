@@ -1587,11 +1587,30 @@ function setupProfileHandlers() {
 
   const clearActivitiesBtn = document.getElementById("btnClearActivitiesBtn");
   if (clearActivitiesBtn) {
-    clearActivitiesBtn.addEventListener("click", () => {
-      if (confirm("Are you sure you want to clear all logged activities and start tracking fresh?")) {
-        store.clearActivities();
-        showToast("Activity history cleared. Ready for your personal tracking!", "info");
+    clearActivitiesBtn.addEventListener("click", async () => {
+      const confirmed = confirm(
+        "Are you sure you want to permanently clear all logged activities and revert AI-provided goals?\n\nThis will permanently delete your emission records from the cloud database."
+      );
+      if (!confirmed) return;
+
+      const originalText = clearActivitiesBtn.textContent;
+      clearActivitiesBtn.textContent = "Clearing...";
+      clearActivitiesBtn.disabled = true;
+
+      try {
+        await store.clearActivities({ revertAiGoals: true, clearAllGoals: true });
+        showToast("Activity history and AI goals permanently cleared.", "success");
+        updateUserProfileUI();
         updateDashboardUI();
+        updateGoalsUI();
+        renderTrendChart("trendChartCanvas", activeTrendFilter);
+        renderCategoryChart("categoryChartCanvas");
+        loadAICoachRecommendations();
+      } catch (err) {
+        showToast("Failed to clear records: " + (err.message || err), "error");
+      } finally {
+        clearActivitiesBtn.textContent = originalText;
+        clearActivitiesBtn.disabled = false;
       }
     });
   }

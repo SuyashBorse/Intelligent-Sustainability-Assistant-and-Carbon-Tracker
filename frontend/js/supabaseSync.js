@@ -64,21 +64,8 @@ export function hydrateStoreFromSupabase(force = false) {
           category: g.category,
           createdAt: g.created_at
         }));
-      } else if (goals && goals.length === 0 && store.state.goals.length > 0) {
-        store.state.goals.forEach(goal => {
-          supabase.from('goals').insert({
-            id: goal.id,
-            user_id: user.id,
-            title: goal.title,
-            description: goal.description,
-            target_co2e_reduction: goal.targetCo2eReductionKg,
-            target_date: goal.targetDate,
-            current_progress: goal.currentProgressPercent,
-            status: goal.status,
-            category: goal.category,
-            created_at: goal.createdAt
-          }).then(() => {});
-        });
+      } else {
+        store.state.goals = [];
       }
       
       // Save to local and trigger UI update
@@ -142,6 +129,41 @@ store.deleteActivity = function(id) {
     supabase.from('activity_logs').delete().eq('id', id).eq('user_id', session.user.id)
       .then(({error}) => { if(error) console.error("Sync error:", error); });
   });
+};
+
+const originalClearActivities = store.clearActivities.bind(store);
+store.clearActivities = async function(options = { revertAiGoals: true }) {
+  const result = originalClearActivities(options);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const userId = session.user.id;
+      // 1. Permanently delete all activity logs from Supabase
+      const delActPromise = supabase.from('activity_logs').delete().eq('user_id', userId);
+
+      // 2. Permanently delete goals from Supabase if requested
+      const delGoalPromise = (options.revertAiGoals || options.clearAllGoals)
+        ? supabase.from('goals').delete().eq('user_id', userId)
+        : Promise.resolve();
+
+      // 3. Clear any saved AI recommendations from Supabase
+      const delAiPromise = supabase.from('ai_recommendations').delete().eq('user_id', userId);
+
+      // 4. Reset profile points and streak in Supabase
+      const syncProfPromise = supabase.from('profiles').upsert({
+        id: userId,
+        points: 0,
+        streak: 0,
+        last_logged_date: null,
+        full_name: store.state.user.name
+      }, { onConflict: 'id' });
+
+      await Promise.allSettled([delActPromise, delGoalPromise, delAiPromise, syncProfPromise]);
+    }
+  } catch (err) {
+    console.error("Failed to permanently delete records from Supabase:", err);
+  }
+  return result;
 };
 
 const originalAddGoal = store.addGoal.bind(store);

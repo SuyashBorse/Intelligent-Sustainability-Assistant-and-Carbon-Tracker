@@ -1040,9 +1040,18 @@ class CarbonStore {
     this.saveState();
   }
 
-  clearActivities() {
+  clearActivities(options = { revertAiGoals: true }) {
     this.state.activities = [];
+    if (this.state.user) {
+      this.state.user.points = 0;
+      this.state.user.streak = 0;
+      this.state.user.lastLoggedDate = null;
+    }
+    if (options.revertAiGoals || options.clearAllGoals) {
+      this.state.goals = [];
+    }
     this.saveState();
+    return { success: true };
   }
 
   createNewUserProfile({ name, email, country = "India", preferredUnit = "kg", reductionTarget = 20 }) {
