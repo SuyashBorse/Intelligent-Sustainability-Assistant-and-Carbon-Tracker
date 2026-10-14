@@ -384,7 +384,8 @@ const INITIAL_STATE = {
       targetCo2eReductionKg: 25,
       currentProgressPercent: 65,
       targetDate: "2026-09-30",
-      status: "in_progress"
+      status: "in_progress",
+      createdAt: "2026-10-10T10:00:00.000Z"
     },
     {
       id: "goal_02",
@@ -393,7 +394,8 @@ const INITIAL_STATE = {
       targetCo2eReductionKg: 18,
       currentProgressPercent: 0,
       targetDate: "2026-10-15",
-      status: "not_started"
+      status: "not_started",
+      createdAt: "2026-10-12T10:00:00.000Z"
     },
     {
       id: "goal_03",
@@ -402,7 +404,8 @@ const INITIAL_STATE = {
       targetCo2eReductionKg: 30,
       currentProgressPercent: 100,
       targetDate: "2026-08-25",
-      status: "completed"
+      status: "completed",
+      createdAt: "2026-10-05T10:00:00.000Z"
     }
   ],
   challenges: [
@@ -979,9 +982,12 @@ class CarbonStore {
 
     let newlyCompleted = false;
 
+    goal.updatedAt = new Date().toISOString();
+
     if (goal.currentProgressPercent >= 100) {
       if (goal.status !== "completed") {
         goal.status = "completed";
+        goal.completedAt = new Date().toISOString();
         this.state.user.points += 100; // Goal completed reward!
         newlyCompleted = true;
       }
@@ -1002,12 +1008,14 @@ class CarbonStore {
     const previousProgress = Number(goal.currentProgressPercent) || 0;
     const newProgress = Math.min(100, Math.max(0, Number(targetPercent)));
     goal.currentProgressPercent = Math.round(newProgress);
+    goal.updatedAt = new Date().toISOString();
 
     let newlyCompleted = false;
 
     if (goal.currentProgressPercent >= 100) {
       if (goal.status !== "completed") {
         goal.status = "completed";
+        goal.completedAt = new Date().toISOString();
         this.state.user.points += 100;
         newlyCompleted = true;
       }

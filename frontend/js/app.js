@@ -721,7 +721,19 @@ function updateGoalsUI() {
   if (countNotStarted) countNotStarted.textContent = String(goals.filter(g => g.status === "not_started").length);
   if (countComp) countComp.textContent = String(goals.filter(g => g.status === "completed").length);
 
-  // Render in Dashboard
+  // Helper function to resolve recency timestamp for sorting
+  const getRecencyTime = g => {
+    const timeStr = g.createdAt || g.updatedAt;
+    if (timeStr) {
+      const t = new Date(timeStr).getTime();
+      if (!isNaN(t)) return t;
+    }
+    // If timestamp missing, use array index (lower index = more recent because unshift adds to front)
+    const idx = goals.indexOf(g);
+    return idx >= 0 ? (1000000000000 - (idx * 10000)) : 0;
+  };
+
+  // Render in Dashboard (Max 3 goals: running goals take priority; completed goals appear if <= 2 running goals; newest first)
   const dashboardContainer = document.getElementById("activeGoalsList");
   if (dashboardContainer) {
     const emptyDashboardGoalsHtml = `
@@ -736,16 +748,41 @@ function updateGoalsUI() {
         </button>
       </div>
     `;
-    dashboardContainer.innerHTML = goals.length > 0 ? goals.map(renderGoalCardHtml).join("") : emptyDashboardGoalsHtml;
+
+    // 1. Separate running/active goals (not_started / in_progress) and completed goals
+    const runningGoals = goals.filter(g => g.status !== "completed");
+    const completedGoals = goals.filter(g => g.status === "completed");
+
+    // 2. Sort both lists so the most recent goals appear first
+    runningGoals.sort((a, b) => getRecencyTime(b) - getRecencyTime(a));
+    completedGoals.sort((a, b) => getRecencyTime(b) - getRecencyTime(a));
+
+    // 3. Selection rules:
+    // - Display at most 3 goals total
+    // - Running goals have priority and occupy slots first
+    // - Completed goals appear only if there are <= 2 running goals, filling the remaining slots
+    const maxDashboardSlots = 3;
+    const selectedRunning = runningGoals.slice(0, maxDashboardSlots);
+    const remainingSlots = maxDashboardSlots - selectedRunning.length;
+    const selectedCompleted = remainingSlots > 0 ? completedGoals.slice(0, remainingSlots) : [];
+
+    const dashboardGoals = [...selectedRunning, ...selectedCompleted];
+
+    dashboardContainer.innerHTML = dashboardGoals.length > 0 
+      ? dashboardGoals.map(renderGoalCardHtml).join("") 
+      : emptyDashboardGoalsHtml;
   }
 
-  // Render in Goals & Gamification View (Filtered)
+  // Render in Goals & Gamification View (Filtered, sorted newest first)
   const goalsViewContainer = document.getElementById("viewGoalsContainer");
   if (goalsViewContainer) {
-    const filteredGoals = goals.filter(g => {
-      if (activeGoalFilter === "all") return true;
-      return g.status === activeGoalFilter;
-    });
+    const filteredGoals = goals
+      .filter(g => {
+        if (activeGoalFilter === "all") return true;
+        return g.status === activeGoalFilter;
+      })
+      .slice()
+      .sort((a, b) => getRecencyTime(b) - getRecencyTime(a));
 
     const emptyFilteredGoalsHtml = `
       <div style="padding: 3rem 1.5rem; text-align: center; background: #f8fafc; border-radius: var(--radius-md); border: 1.5px dashed var(--border);">
