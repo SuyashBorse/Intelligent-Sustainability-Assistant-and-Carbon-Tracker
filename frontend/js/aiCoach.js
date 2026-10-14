@@ -72,59 +72,142 @@ export function validateGeminiResponse(data) {
  */
 export function generateFallbackRecommendations(payload, customTopic = null) {
   const cb = payload.categories || {};
-  const topCat = Object.keys(cb).reduce((a, b) => ((cb[a] || 0) > (cb[b] || 0) ? a : b), "transportation");
+  const sortedCats = Object.entries(cb)
+    .filter(([_, val]) => Number(val) > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  const topCat = sortedCats.length > 0 ? sortedCats[0][0] : "transportation";
+  const totalCo2 = Number(payload.total_co2_kg) || 0;
+
+  const catalog = {
+    transportation: [
+      {
+        title: "Transition 2 Weekly Commutes to Rail or Bus",
+        category: "transportation",
+        priority: "high",
+        reason: `Commute and vehicular travel generated ${cb.transportation || 0} kg CO₂e in your logged history.`,
+        action: "Swap two solo car commutes per week with metro transit, cycling, or carpooling.",
+        estimated_impact_kg_co2_per_month: Math.max(12, Math.round((cb.transportation || 24.5) * 0.3)),
+        difficulty: "easy"
+      },
+      {
+        title: "Active Micro-Mobility for Trips Under 3 km",
+        category: "transportation",
+        priority: "medium",
+        reason: "Short urban drives emit disproportionate emissions due to cold engine starts.",
+        action: "Walk, cycle, or use an e-bike for neighbourhood errands under 3 kilometers.",
+        estimated_impact_kg_co2_per_month: 8.5,
+        difficulty: "easy"
+      }
+    ],
+    energy: [
+      {
+        title: "Smart Thermostat & Vampire Load Shutdown",
+        category: "energy",
+        priority: "high",
+        reason: `Home electricity represents a primary baseline (${cb.energy || 0} kg CO₂e recorded).`,
+        action: "Adjust temperature by 1°C and switch off idle electronics using power strips.",
+        estimated_impact_kg_co2_per_month: Math.max(10, Math.round((cb.energy || 16) * 0.25)),
+        difficulty: "easy"
+      },
+      {
+        title: "Switch to High-Efficiency LED Lighting",
+        category: "energy",
+        priority: "medium",
+        reason: "Lighting upgrades provide immediate, continuous reductions in daily power demand.",
+        action: "Replace legacy incandescent bulbs with warm-spectrum LEDs across active rooms.",
+        estimated_impact_kg_co2_per_month: 9.0,
+        difficulty: "easy"
+      }
+    ],
+    food: [
+      {
+        title: "Adopt 2 Plant-Powered Dinners Per Week",
+        category: "food",
+        priority: "high",
+        reason: `Dietary choices contributed ${cb.food || 0} kg CO₂e, with ruminant meat emitting over 6x more than plant proteins.`,
+        action: "Substitute beef or lamb with lentil curry, chickpea bowls, or plant proteins twice weekly.",
+        estimated_impact_kg_co2_per_month: Math.max(14, Math.round((cb.food || 22) * 0.35)),
+        difficulty: "medium"
+      },
+      {
+        title: "Zero Food-Waste Meal Planning",
+        category: "food",
+        priority: "medium",
+        reason: "Discarded food decomposing in landfills creates potent methane emissions.",
+        action: "Plan weekly grocery purchases with portion control and freeze leftovers promptly.",
+        estimated_impact_kg_co2_per_month: 11.5,
+        difficulty: "easy"
+      }
+    ],
+    shopping: [
+      {
+        title: "30-Day Mindful Purchase Pause",
+        category: "shopping",
+        priority: "high",
+        reason: `Apparel and consumer goods contributed ${cb.shopping || 0} kg CO₂e from industrial supply chains.`,
+        action: "Apply a 72-hour cooling-off rule before purchasing non-essential apparel or goods.",
+        estimated_impact_kg_co2_per_month: Math.max(15, Math.round((cb.shopping || 20) * 0.4)),
+        difficulty: "medium"
+      },
+      {
+        title: "Prioritize Pre-Owned & Garment Repair",
+        category: "shopping",
+        priority: "medium",
+        reason: "Extending product lifespans by 9 months reduces supply chain footprint by over 20%.",
+        action: "Repair worn garments and opt for certified refurbished or pre-owned goods.",
+        estimated_impact_kg_co2_per_month: 12.0,
+        difficulty: "easy"
+      }
+    ],
+    water: [
+      {
+        title: "6-Minute Showers & Flow Regulators",
+        category: "water",
+        priority: "medium",
+        reason: `Water heating accounted for ${cb.water || 0} kg CO₂e in domestic thermal energy consumption.`,
+        action: "Shorten hot showers to 6 minutes and fit a low-flow aerator to primary faucets.",
+        estimated_impact_kg_co2_per_month: Math.max(6, Math.round((cb.water || 8.5) * 0.3)),
+        difficulty: "easy"
+      },
+      {
+        title: "Cold Water Laundry Cycles (30°C)",
+        category: "water",
+        priority: "low",
+        reason: "90% of washing machine energy is consumed heating the wash water.",
+        action: "Run full laundry loads on cold or eco 30°C wash cycles.",
+        estimated_impact_kg_co2_per_month: 7.2,
+        difficulty: "easy"
+      }
+    ]
+  };
 
   let recommendations = [];
+  const primaryList = catalog[topCat] || catalog.transportation;
+  recommendations.push(primaryList[0]);
 
-  if (topCat === "transportation" || (customTopic && customTopic.toLowerCase().includes("commute"))) {
-    recommendations.push({
-      title: "Transition 2 Weekly Commutes to Rail or Bus",
-      category: "transportation",
-      priority: "high",
-      reason: `Gasoline car travel accounted for your highest single emissions category (${cb.transportation || 0} kg CO₂e this period).`,
-      action: "Swap two solo car commutes per week with metro transit or carpooling with colleagues.",
-      estimated_impact_kg_co2_per_month: 24.5,
-      difficulty: "easy"
-    });
+  // Add recommendations from secondary logged categories
+  for (const [catName] of sortedCats) {
+    if (catName !== topCat && catalog[catName] && recommendations.length < 3) {
+      recommendations.push(catalog[catName][0]);
+    }
   }
 
-  if ((cb.energy || 0) > 15 || (customTopic && customTopic.toLowerCase().includes("energy"))) {
-    recommendations.push({
-      title: "Smart Thermostat & Vampire Load Shutdown",
-      category: "energy",
-      priority: "medium",
-      reason: "Home electricity contributes steadily to your baseline footprint.",
-      action: "Lower heating by 1°C / raise cooling by 1°C and switch off power strips when leaving home.",
-      estimated_impact_kg_co2_per_month: 16.0,
-      difficulty: "easy"
-    });
+  // Fill up to 3 recommendations if user logged only 1 category
+  if (recommendations.length < 3 && primaryList[1]) {
+    recommendations.push(primaryList[1]);
   }
-
-  if ((cb.food || 0) > 10 || (customTopic && customTopic.toLowerCase().includes("food"))) {
-    recommendations.push({
-      title: "Adopt 2 Plant-Powered Dinners Per Week",
-      category: "food",
-      priority: "medium",
-      reason: "Beef and ruminant meat generate over 6x more emissions per meal than plant-based proteins.",
-      action: "Substitute ground beef or steak with lentil curry, chickpea bowls, or plant-based proteins twice weekly.",
-      estimated_impact_kg_co2_per_month: 22.0,
-      difficulty: "medium"
-    });
+  const allCats = ["energy", "food", "transportation", "shopping", "water"];
+  for (const c of allCats) {
+    if (recommendations.length >= 3) break;
+    if (!recommendations.some(r => r.category === c)) {
+      recommendations.push(catalog[c][0]);
+    }
   }
-
-  recommendations.push({
-    title: "Eco Shower Habit & Cold Laundry Cycle",
-    category: "water",
-    priority: "low",
-    reason: "Water heating uses substantial natural gas or electricity.",
-    action: "Shorten hot showers to 6 minutes and wash 80% of laundry loads on 30°C or cold water cycle.",
-    estimated_impact_kg_co2_per_month: 8.5,
-    difficulty: "easy"
-  });
 
   const response = {
-    summary: `Based on your last 30 days of activity (${payload.total_co2_kg} kg estimated CO₂e), ${topCat} is your primary footprint driver. Targeted reductions in commute efficiency and dietary shifts can reduce your monthly footprint by up to 28%.`,
-    overall_priority: "medium",
+    summary: `Based on your logged activity history (${totalCo2} kg estimated CO₂e), ${topCat} is your primary footprint driver. Targeted reductions in commute efficiency and dietary shifts can reduce your monthly footprint by up to 28%.`,
+    overall_priority: totalCo2 > 150 ? "high" : "medium",
     recommendations: recommendations.slice(0, 3)
   };
 

@@ -100,7 +100,7 @@ export function createFreshAccountState({ name, email, country = "India", prefer
       lastLoggedDate: null
     },
     activities: [],
-    goals: getStarterGoals(reductionTarget),
+    goals: [],
     challenges: [
       {
         id: "ch_01",
@@ -653,7 +653,7 @@ class CarbonStore {
       } else {
         parsed.goals = activeEmail === DEMO_EMAIL
           ? JSON.parse(JSON.stringify(INITIAL_STATE.goals))
-          : getStarterGoals(parsed.user.reductionTarget);
+          : [];
       }
 
       // Normalize activities (migrate legacy IDs to UUIDs)

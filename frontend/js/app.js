@@ -1685,6 +1685,10 @@ function setupActivityForm() {
         form.reset();
         populateActivityOptions("transportation");
         evaluateAchievements();
+        // Automatically wake up AI Coach when user logs their first activities
+        if (store.getState().activities.length <= 3) {
+          loadAICoachRecommendations();
+        }
       } catch (err) {
         showToast(err.message || "Failed to save activity", "error");
       }
@@ -1720,6 +1724,31 @@ async function loadAICoachRecommendations(promptTopic = null) {
   const deck = document.getElementById("aiRecommendationsDeck");
   const summaryBox = document.getElementById("aiSummaryBox");
   if (!deck) return;
+
+  const state = store.getState();
+  const activities = state.activities || [];
+
+  // Zero-Activity Guard: Save 100% of tokens when user has no emissions history
+  if (activities.length === 0 && !promptTopic) {
+    if (summaryBox) {
+      summaryBox.style.display = "none";
+    }
+    deck.innerHTML = `
+      <div style="text-align: center; padding: 2.75rem 1.5rem; background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--radius-lg); margin: 0.5rem 0;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🌱 🤖</div>
+        <h4 style="font-size: 1.18rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text-main);">Your Gemini AI Coach is on Standby</h4>
+        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem auto; font-size: 0.92rem; line-height: 1.55;">
+          You haven't recorded any carbon emissions yet. Log your first commute, electricity usage, or meal above to unlock personalized AI coaching tailored to your actual habits.
+        </p>
+        <button type="button" class="btn btn-primary btn-sm btn-open-log-modal" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          + Log Your First Activity
+        </button>
+      </div>
+    `;
+    deck.querySelector(".btn-open-log-modal")?.addEventListener("click", openActivityModal);
+    return;
+  }
 
   if (summaryBox) {
     summaryBox.style.display = "none";
