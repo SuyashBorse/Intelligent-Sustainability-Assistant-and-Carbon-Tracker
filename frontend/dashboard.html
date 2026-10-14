@@ -424,12 +424,15 @@
             </div>
           </div>
 
-          <!-- Recent Logs Table -->
-          <div class="card" style="margin-top: 2rem;">
+          <!-- Recent Activity Snapshot (Last 3) -->
+          <div class="card" style="margin-top: 1.5rem;">
             <div class="card-header">
               <div>
-                <div class="card-title">Recent Activity Logs</div>
-                <div class="card-subtitle">Latest recorded entries and calculated CO₂e snapshots</div>
+                <div class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Recent Activity Logs
+                </div>
+                <div class="card-subtitle">Showing your last 3 recorded emissions</div>
               </div>
               <button class="btn btn-secondary btn-sm btn-open-log-modal">+ Log Activity</button>
             </div>
@@ -446,9 +449,14 @@
                   </tr>
                 </thead>
                 <tbody id="dashboardRecentTableBody">
-                  <!-- Dynamically populated -->
+                  <!-- Dynamically populated (max 3 entries) -->
                 </tbody>
               </table>
+            </div>
+            <div style="text-align: center; margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px solid var(--border-light);">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="switchView('activities')">
+                📋 View Complete Activity History (<span id="dashboardTotalActivitiesCount">0</span> entries) →
+              </button>
             </div>
           </div>
         </section>

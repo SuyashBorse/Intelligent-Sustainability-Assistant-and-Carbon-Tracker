@@ -492,11 +492,10 @@ function updateDashboardUI() {
   updateGoalsUI();
 
 
-  // Recent Activity Table (in Dashboard and Activities view)
-  const recentTables = [document.getElementById("dashboardRecentTableBody"), document.getElementById("activitiesFullTableBody")];
-  recentTables.forEach(tbody => {
-    if (!tbody) return;
-    tbody.innerHTML = state.activities.slice(0, 10).map(act => `
+  // 1. Dashboard Recent Activity Table (Capped at 3 quick entries)
+  const dashboardTbody = document.getElementById("dashboardRecentTableBody");
+  if (dashboardTbody) {
+    dashboardTbody.innerHTML = state.activities.slice(0, 3).map(act => `
       <tr>
         <td><strong>${act.date}</strong></td>
         <td><span class="badge badge-${act.category}">${act.category}</span></td>
@@ -509,8 +508,33 @@ function updateDashboardUI() {
           </button>
         </td>
       </tr>
-    `).join("") || `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No activities logged yet.</td></tr>`;
-  });
+    `).join("") || `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No activities logged yet. Click "+ Log Activity" above to begin!</td></tr>`;
+  }
+
+  // Update total activities counter on dashboard footer button
+  const totalActsEl = document.getElementById("dashboardTotalActivitiesCount");
+  if (totalActsEl) {
+    totalActsEl.textContent = String(state.activities.length);
+  }
+
+  // 2. Full Activities History View (All recorded entries)
+  const fullTbody = document.getElementById("activitiesFullTableBody");
+  if (fullTbody) {
+    fullTbody.innerHTML = state.activities.map(act => `
+      <tr>
+        <td><strong>${act.date}</strong></td>
+        <td><span class="badge badge-${act.category}">${act.category}</span></td>
+        <td>${act.activityType}</td>
+        <td>${act.quantity} ${act.unit}</td>
+        <td><strong style="color: var(--text-main);">${act.co2eKg} kg</strong></td>
+        <td>
+          <button class="btn btn-ghost btn-sm btn-delete-act" data-id="${act.id}" title="Delete Activity" style="color: var(--danger);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </td>
+      </tr>
+    `).join("") || `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No activities logged yet. Click "+ Log New Activity" above to begin!</td></tr>`;
+  }
 
   // Attach delete handlers
   document.querySelectorAll(".btn-delete-act").forEach(btn => {
