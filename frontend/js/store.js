@@ -586,6 +586,9 @@ class CarbonStore {
 
   loadState() {
     try {
+      if (typeof localStorage === "undefined") {
+        return JSON.parse(JSON.stringify(INITIAL_STATE));
+      }
       const activeEmail = this.getActiveEmail();
       const accountKey = getAccountStorageKey(activeEmail);
 
@@ -821,7 +824,9 @@ class CarbonStore {
   }
 
   dispatchChange() {
-    window.dispatchEvent(new CustomEvent("carbon_state_changed", { detail: this.state }));
+    if (typeof window !== "undefined" && typeof CustomEvent !== "undefined") {
+      window.dispatchEvent(new CustomEvent("carbon_state_changed", { detail: this.state }));
+    }
   }
 
   getState() {

@@ -176,10 +176,10 @@ CREATE POLICY "Users can manage own achievements" ON user_achievements FOR ALL U
 -- Policies for AI Recommendations
 CREATE POLICY "Users can manage own recommendations" ON ai_recommendations FOR ALL USING (auth.uid() = user_id);
 
--- Read access for global tables
-CREATE POLICY "Enable read access for all authenticated users" ON emission_factors FOR SELECT USING (auth.role() = 'authenticated');
-CREATE POLICY "Enable read access for all authenticated users" ON challenges FOR SELECT USING (auth.role() = 'authenticated');
-CREATE POLICY "Enable read access for all authenticated users" ON achievements FOR SELECT USING (auth.role() = 'authenticated');
+-- Read access for global reference tables (allow both authenticated and anon reading)
+CREATE POLICY "Enable read access for all users" ON emission_factors FOR SELECT USING (true);
+CREATE POLICY "Enable read access for all users" ON challenges FOR SELECT USING (true);
+CREATE POLICY "Enable read access for all users" ON achievements FOR SELECT USING (true);
 
 -- Trigger to create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -194,3 +194,65 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- ============================================================================
+-- SEED DATA: Master Emission Factors (IPCC / DEFRA / EPA / Our World in Data)
+-- ============================================================================
+INSERT INTO emission_factors (id, category, activity_type, unit, emission_factor, source, region) VALUES
+  ('ef_trans_car_petrol', 'transportation', 'Car (Petrol / Gasoline)', 'km', 0.21, 'DEFRA 2023 / EPA', 'Global Average'),
+  ('ef_trans_car_diesel', 'transportation', 'Car (Diesel)', 'km', 0.18, 'DEFRA 2023', 'Global Average'),
+  ('ef_trans_car_ev', 'transportation', 'Electric Vehicle (EV)', 'km', 0.05, 'IEA Grid Avg', 'Global Average'),
+  ('ef_trans_bus', 'transportation', 'City Bus / Public Transit', 'km', 0.08, 'EPA Transit', 'Global Average'),
+  ('ef_trans_train', 'transportation', 'Train / Metro / Subway', 'km', 0.04, 'DEFRA Rail', 'Global Average'),
+  ('ef_trans_flight_domestic', 'transportation', 'Flight (Short Haul / Domestic)', 'km', 0.25, 'ICAO / DEFRA', 'Global'),
+  ('ef_trans_flight_long', 'transportation', 'Flight (Long Haul)', 'km', 0.15, 'ICAO / DEFRA', 'Global'),
+  ('ef_trans_motorbike', 'transportation', 'Motorcycle / Scooter', 'km', 0.11, 'DEFRA 2023', 'Global Average'),
+  ('ef_energy_grid', 'energy', 'Grid Electricity', 'kWh', 0.42, 'EIA / IEA', 'Average Mixed Grid'),
+  ('ef_energy_gas', 'energy', 'Natural Gas (Heating / Cooking)', 'kWh', 0.20, 'EPA GHG Factors', 'Global Average'),
+  ('ef_energy_heating_oil', 'energy', 'Heating Oil', 'liters', 2.70, 'DEFRA Fuel', 'Global Average'),
+  ('ef_energy_solar', 'energy', 'Rooftop Solar', 'kWh', 0.02, 'NREL Lifecycle', 'Global'),
+  ('ef_food_beef', 'food', 'Beef Meal', 'meals', 6.50, 'Poore & Nemecek (Science)', 'Global'),
+  ('ef_food_chicken', 'food', 'Poultry / Chicken Meal', 'meals', 1.80, 'Our World in Data', 'Global'),
+  ('ef_food_pork', 'food', 'Pork Meal', 'meals', 2.20, 'Our World in Data', 'Global'),
+  ('ef_food_vegetarian', 'food', 'Vegetarian Meal (Eggs/Dairy)', 'meals', 0.90, 'Oxford Food Study', 'Global'),
+  ('ef_food_vegan', 'food', '100% Plant-Based / Vegan Meal', 'meals', 0.50, 'Oxford Food Study', 'Global'),
+  ('ef_food_dairy_milk', 'food', 'Dairy Milk', 'liters', 1.20, 'Poore & Nemecek', 'Global'),
+  ('ef_water_shower', 'water', 'Hot Shower (8-10 mins)', 'showers', 0.85, 'Waterwise / Carbon Trust', 'Global Average'),
+  ('ef_water_tap', 'water', 'Tap Water Supply', 'liters', 0.0003, 'UK Water Industry', 'Municipal'),
+  ('ef_water_bottled', 'water', 'Bottled Water (Plastic 500ml)', 'bottles', 0.16, 'Beverage Council', 'Global'),
+  ('ef_shop_clothing', 'shopping', 'Clothing / Apparel Item', 'items', 8.50, 'WRAP UK / Textile Exchange', 'Global'),
+  ('ef_shop_smartphone', 'shopping', 'New Smartphone', 'units', 60.00, 'Apple / Fairphone Environmental Reports', 'Global'),
+  ('ef_shop_laptop', 'shopping', 'New Laptop Computer', 'units', 200.00, 'Dell / HP Carbon Disclosures', 'Global'),
+  ('ef_shop_general', 'shopping', 'General Household Consumer Goods', 'kg', 2.50, 'EPA WARM Model', 'Global')
+ON CONFLICT (id) DO UPDATE SET
+  emission_factor = EXCLUDED.emission_factor,
+  source = EXCLUDED.source,
+  region = EXCLUDED.region;
+
+-- ============================================================================
+-- SEED DATA: Default Sustainability Challenges
+-- ============================================================================
+INSERT INTO challenges (id, title, description, category, difficulty, points, target_value, unit) VALUES
+  ('ch_01', 'Transit Pioneer', 'Log at least 5 public transit or cycling trips this week.', 'transportation', 'easy', 50, 5, 'trips'),
+  ('ch_02', 'Plant Power Week', 'Record 4 plant-based meals in the food category.', 'food', 'medium', 50, 4, 'meals'),
+  ('ch_03', 'Phantom Watt Hunter', 'Log energy baseline under 10 kWh for 3 consecutive days.', 'energy', 'hard', 60, 3, 'days'),
+  ('ch_04', 'Mindful Consumer', 'Keep shopping and apparel purchases at 0 for 7 straight days.', 'shopping', 'medium', 75, 7, 'days')
+ON CONFLICT (id) DO UPDATE SET
+  title = EXCLUDED.title,
+  description = EXCLUDED.description,
+  points = EXCLUDED.points;
+
+-- ============================================================================
+-- SEED DATA: Default Achievement Badges
+-- ============================================================================
+INSERT INTO achievements (id, name, description, icon, condition_type, condition_value, points) VALUES
+  ('ach_01', 'First Step', 'Record your very first carbon activity log.', '🌱', 'activity_count', 1, 25),
+  ('ach_02', 'Green Traveler', 'Log 5 public transit or zero-emission commute trips.', '🚲', 'transit_trips', 5, 50),
+  ('ach_03', '7-Day Streak', 'Maintain a continuous daily carbon logging streak for 7 days.', '🔥', 'streak_days', 7, 75),
+  ('ach_04', 'Energy Warden', 'Reduce home electricity consumption by 20% compared to baseline.', '⚡', 'energy_reduction', 20, 100),
+  ('ach_05', 'Eco Champion', 'Accumulate 500+ sustainability points through active habits.', '👑', 'total_points', 500, 150)
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  points = EXCLUDED.points;
+

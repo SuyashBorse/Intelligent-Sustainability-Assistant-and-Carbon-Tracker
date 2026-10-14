@@ -2,12 +2,14 @@
  * AI Sustainability Coach Service
  * Strictly follows AI_GEMINI_SPEC.md:
  * - Summarizes user activity payload without leaking sensitive data
- * - Generates structured JSON matching schema
- * - Validates schema before rendering
+ * - In production: Invokes Supabase Edge Function `generate-recommendations` (Gemini API)
+ * - Offline/Demo mode: Seamlessly falls back to local adaptive rule engine
+ * - Enforces strict structured JSON schema validation
  * - Emphasizes practical, non-judgmental, high-impact recommendations
  */
 
 import { store } from "./store.js";
+import { supabase } from "./supabaseClient.js";
 
 /**
  * Compiles a compact, privacy-safe activity summary payload for the AI
@@ -49,51 +51,44 @@ export function buildActivitySummaryPayload() {
  */
 export function validateGeminiResponse(data) {
   if (!data || typeof data !== "object") return false;
-  if (typeof data.summary !== "string") return false;
+  if (typeof data.summary !== "string" || !data.summary.trim()) return false;
   if (!["low", "medium", "high"].includes(data.overall_priority)) return false;
   if (!Array.isArray(data.recommendations) || data.recommendations.length === 0) return false;
 
   for (const rec of data.recommendations) {
-    if (typeof rec.title !== "string") return false;
+    if (typeof rec.title !== "string" || !rec.title.trim()) return false;
     if (!["transportation", "energy", "food", "water", "shopping"].includes(rec.category)) return false;
     if (!["low", "medium", "high"].includes(rec.priority)) return false;
-    if (typeof rec.reason !== "string") return false;
-    if (typeof rec.action !== "string") return false;
-    if (typeof rec.estimated_impact_kg_co2_per_month !== "number") return false;
+    if (typeof rec.reason !== "string" || !rec.reason.trim()) return false;
+    if (typeof rec.action !== "string" || !rec.action.trim()) return false;
+    if (typeof rec.estimated_impact_kg_co2_per_month !== "number" || isNaN(rec.estimated_impact_kg_co2_per_month)) return false;
     if (!["easy", "medium", "hard"].includes(rec.difficulty)) return false;
   }
   return true;
 }
 
 /**
- * Generate intelligent recommendations based on active user profile & data
- * In production, this calls the Supabase Edge Function `generate-recommendations`.
- * On the frontend, it uses adaptive rule-backed intelligence to produce valid schema output immediately.
+ * Fallback adaptive recommendation generator for offline or unconfigured states
  */
-export async function getRecommendations(customTopic = null) {
-  const payload = buildActivitySummaryPayload();
-  
-  // Simulate network roundtrip to AI Edge Function
-  await new Promise(resolve => setTimeout(resolve, 600));
-
-  const cb = payload.categories;
-  const topCat = Object.keys(cb).reduce((a, b) => cb[a] > cb[b] ? a : b, "transportation");
+export function generateFallbackRecommendations(payload, customTopic = null) {
+  const cb = payload.categories || {};
+  const topCat = Object.keys(cb).reduce((a, b) => ((cb[a] || 0) > (cb[b] || 0) ? a : b), "transportation");
 
   let recommendations = [];
 
-  if (topCat === "transportation" || (customTopic && customTopic.includes("commute"))) {
+  if (topCat === "transportation" || (customTopic && customTopic.toLowerCase().includes("commute"))) {
     recommendations.push({
       title: "Transition 2 Weekly Commutes to Rail or Bus",
       category: "transportation",
       priority: "high",
-      reason: `Gasoline car travel accounted for your highest single emissions category (${cb.transportation} kg CO₂e this period).`,
+      reason: `Gasoline car travel accounted for your highest single emissions category (${cb.transportation || 0} kg CO₂e this period).`,
       action: "Swap two solo car commutes per week with metro transit or carpooling with colleagues.",
       estimated_impact_kg_co2_per_month: 24.5,
       difficulty: "easy"
     });
   }
 
-  if (cb.energy > 15 || (customTopic && customTopic.includes("energy"))) {
+  if ((cb.energy || 0) > 15 || (customTopic && customTopic.toLowerCase().includes("energy"))) {
     recommendations.push({
       title: "Smart Thermostat & Vampire Load Shutdown",
       category: "energy",
@@ -105,7 +100,7 @@ export async function getRecommendations(customTopic = null) {
     });
   }
 
-  if (cb.food > 10 || (customTopic && customTopic.includes("food"))) {
+  if ((cb.food || 0) > 10 || (customTopic && customTopic.toLowerCase().includes("food"))) {
     recommendations.push({
       title: "Adopt 2 Plant-Powered Dinners Per Week",
       category: "food",
@@ -135,8 +130,64 @@ export async function getRecommendations(customTopic = null) {
 
   // Enforce schema validation
   if (!validateGeminiResponse(response)) {
-    throw new Error("AI response failed schema validation.");
+    throw new Error("Fallback AI response failed schema validation.");
   }
 
   return response;
+}
+
+/**
+ * Generate intelligent recommendations based on active user profile & data
+ * 1. Invokes the Supabase Edge Function `generate-recommendations` (Gemini API)
+ * 2. If user is authenticated, saves recommendations into PostgreSQL
+ * 3. Falls back gracefully to the adaptive client rule engine if offline or unconfigured
+ */
+export async function getRecommendations(customTopic = null) {
+  const payload = buildActivitySummaryPayload();
+  if (customTopic) {
+    payload.custom_focus = customTopic;
+  }
+
+  // 1. Attempt calling Supabase Edge Function
+  try {
+    const { data, error } = await supabase.functions.invoke("generate-recommendations", {
+      body: payload
+    });
+
+    if (!error && data && validateGeminiResponse(data)) {
+      // If user is authenticated in Supabase, persist recommendations in PostgreSQL
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData?.session?.user;
+        if (user && Array.isArray(data.recommendations)) {
+          const records = data.recommendations.map(rec => ({
+            user_id: user.id,
+            recommendation_type: rec.priority,
+            title: rec.title,
+            description: `${rec.reason} ${rec.action}`,
+            priority: rec.priority,
+            estimated_impact: rec.estimated_impact_kg_co2_per_month,
+            category: rec.category
+          }));
+          await supabase.from("ai_recommendations").insert(records);
+        }
+      } catch (saveErr) {
+        console.warn("Could not persist recommendations to Supabase:", saveErr);
+      }
+
+      return data;
+    }
+
+    if (error) {
+      console.warn("Edge Function generate-recommendations returned error, using adaptive fallback:", error.message || error);
+    }
+  } catch (edgeErr) {
+    console.warn("Could not reach generate-recommendations Edge Function, using adaptive fallback:", edgeErr.message || edgeErr);
+  }
+
+  // Brief pause for UI smoothness before rendering fallback
+  await new Promise(resolve => setTimeout(resolve, 400));
+
+  // 2. Return validated fallback recommendations
+  return generateFallbackRecommendations(payload, customTopic);
 }
