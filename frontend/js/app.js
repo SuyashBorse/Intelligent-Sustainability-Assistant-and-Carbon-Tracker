@@ -15,6 +15,9 @@ import { getRecommendations } from "./aiCoach.js";
 // State
 let currentSelectedCategory = "transportation";
 let activeTrendFilter = "7d";
+let activeActivityCategoryFilter = "all";
+let activeActivitySearch = "";
+let activeActivityDate = "";
 
 // ==========================================================================
 // Animation Engine & Visual Motion Utilities
@@ -245,6 +248,8 @@ function switchView(viewName) {
   } else if (viewName === "goals") {
     updateGoalsUI();
     updateGamificationUI();
+  } else if (viewName === "activities") {
+    updateFullActivitiesTable();
   }
 }
 
@@ -517,28 +522,139 @@ function updateDashboardUI() {
     totalActsEl.textContent = String(state.activities.length);
   }
 
-  // 2. Full Activities History View (All recorded entries)
-  const fullTbody = document.getElementById("activitiesFullTableBody");
-  if (fullTbody) {
-    fullTbody.innerHTML = state.activities.map(act => `
-      <tr>
-        <td><strong>${act.date}</strong></td>
-        <td><span class="badge badge-${act.category}">${act.category}</span></td>
-        <td>${act.activityType}</td>
-        <td>${act.quantity} ${act.unit}</td>
-        <td><strong style="color: var(--text-main);">${act.co2eKg} kg</strong></td>
-        <td>
-          <button class="btn btn-ghost btn-sm btn-delete-act" data-id="${act.id}" title="Delete Activity" style="color: var(--danger);">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
-        </td>
-      </tr>
-    `).join("") || `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No activities logged yet. Click "+ Log New Activity" above to begin!</td></tr>`;
+  // 2. Full Activities History View (Filtered & Searchable)
+  updateFullActivitiesTable();
+
+  // Attach delete handlers for dashboard recent table
+  if (dashboardTbody) {
+    dashboardTbody.querySelectorAll(".btn-delete-act").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-id");
+        if (id) {
+          store.deleteActivity(id);
+          showToast("Activity deleted successfully.", "info");
+        }
+      });
+    });
   }
 
-  // Attach delete handlers
-  document.querySelectorAll(".btn-delete-act").forEach(btn => {
-    btn.addEventListener("click", (e) => {
+  // Gamification Page Updates
+  updateGamificationUI();
+}
+
+// ==========================================================================
+// Activities History Filter & Search Controller
+// ==========================================================================
+
+export function updateFullActivitiesTable() {
+  const fullTbody = document.getElementById("activitiesFullTableBody");
+  if (!fullTbody) return;
+
+  const state = store.getState();
+  const allActivities = state.activities || [];
+
+  // Update category counts on filter pills
+  const counts = {
+    all: allActivities.length,
+    transportation: 0,
+    energy: 0,
+    food: 0,
+    water: 0,
+    shopping: 0
+  };
+
+  allActivities.forEach(a => {
+    const cat = (a.category || "").toLowerCase();
+    if (counts[cat] !== undefined) {
+      counts[cat]++;
+    }
+  });
+
+  const countAllEl = document.getElementById("countActCatAll");
+  const countTransEl = document.getElementById("countActCatTransport");
+  const countEnergyEl = document.getElementById("countActCatEnergy");
+  const countFoodEl = document.getElementById("countActCatFood");
+  const countWaterEl = document.getElementById("countActCatWater");
+  const countShopEl = document.getElementById("countActCatShopping");
+
+  if (countAllEl) countAllEl.textContent = String(counts.all);
+  if (countTransEl) countTransEl.textContent = String(counts.transportation);
+  if (countEnergyEl) countEnergyEl.textContent = String(counts.energy);
+  if (countFoodEl) countFoodEl.textContent = String(counts.food);
+  if (countWaterEl) countWaterEl.textContent = String(counts.water);
+  if (countShopEl) countShopEl.textContent = String(counts.shopping);
+
+  // Filter activities
+  let filtered = [...allActivities];
+
+  if (activeActivityCategoryFilter !== "all") {
+    filtered = filtered.filter(a => (a.category || "").toLowerCase() === activeActivityCategoryFilter.toLowerCase());
+  }
+
+  if (activeActivitySearch && activeActivitySearch.trim()) {
+    const q = activeActivitySearch.trim().toLowerCase();
+    filtered = filtered.filter(a =>
+      (a.activityType || "").toLowerCase().includes(q) ||
+      (a.category || "").toLowerCase().includes(q) ||
+      (a.unit || "").toLowerCase().includes(q)
+    );
+  }
+
+  if (activeActivityDate) {
+    filtered = filtered.filter(a => a.date === activeActivityDate);
+  }
+
+  // Update summary pill
+  const filteredCountEl = document.getElementById("activitiesFilteredCount");
+  const totalCountEl = document.getElementById("activitiesTotalCount");
+  if (filteredCountEl) filteredCountEl.textContent = String(filtered.length);
+  if (totalCountEl) totalCountEl.textContent = String(allActivities.length);
+
+  // Render table rows
+  if (filtered.length === 0) {
+    const isFiltered = activeActivityCategoryFilter !== "all" || Boolean(activeActivitySearch.trim()) || Boolean(activeActivityDate);
+    fullTbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 1.5rem;">
+          <div style="font-size: 2.2rem; margin-bottom: 0.6rem;">🔍</div>
+          <div style="font-weight: 600; font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.35rem;">
+            ${isFiltered ? "No matching activities found" : "No activities logged yet"}
+          </div>
+          <p style="font-size: 0.85rem; max-width: 440px; margin: 0 auto 1.25rem; color: var(--text-muted);">
+            ${isFiltered 
+              ? "No recorded emissions match your current category, search, or date filter. Try selecting another category or clearing your search." 
+              : 'Click "+ Log New Activity" above to begin recording and calculating your daily emissions!'}
+          </p>
+          ${isFiltered ? `<button type="button" class="btn btn-secondary btn-sm" id="btnResetActivityFiltersEmpty">Reset All Filters</button>` : ''}
+        </td>
+      </tr>
+    `;
+
+    const resetEmptyBtn = document.getElementById("btnResetActivityFiltersEmpty");
+    if (resetEmptyBtn) {
+      resetEmptyBtn.addEventListener("click", resetActivityFilters);
+    }
+    return;
+  }
+
+  fullTbody.innerHTML = filtered.map(act => `
+    <tr>
+      <td><strong>${act.date}</strong></td>
+      <td><span class="badge badge-${act.category}">${act.category}</span></td>
+      <td>${act.activityType}</td>
+      <td>${act.quantity} ${act.unit}</td>
+      <td><strong style="color: var(--text-main);">${act.co2eKg} kg</strong></td>
+      <td>
+        <button class="btn btn-ghost btn-sm btn-delete-act" data-id="${act.id}" title="Delete Activity" style="color: var(--danger);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </td>
+    </tr>
+  `).join("");
+
+  // Attach delete handlers for filtered rows
+  fullTbody.querySelectorAll(".btn-delete-act").forEach(btn => {
+    btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-id");
       if (id) {
         store.deleteActivity(id);
@@ -546,9 +662,60 @@ function updateDashboardUI() {
       }
     });
   });
+}
 
-  // Gamification Page Updates
-  updateGamificationUI();
+export function resetActivityFilters() {
+  activeActivityCategoryFilter = "all";
+  activeActivitySearch = "";
+  activeActivityDate = "";
+
+  document.querySelectorAll("[data-act-category]").forEach(b => {
+    b.classList.toggle("active", b.getAttribute("data-act-category") === "all");
+  });
+
+  const searchInput = document.getElementById("activitySearchInput");
+  if (searchInput) searchInput.value = "";
+
+  const dateInput = document.getElementById("activityDateFilterInput");
+  if (dateInput) dateInput.value = "";
+
+  updateFullActivitiesTable();
+}
+
+export function setupActivityTableFilters() {
+  // Category pills
+  document.querySelectorAll("[data-act-category]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-act-category]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeActivityCategoryFilter = btn.getAttribute("data-act-category") || "all";
+      updateFullActivitiesTable();
+    });
+  });
+
+  // Search input
+  const searchInput = document.getElementById("activitySearchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      activeActivitySearch = e.target.value || "";
+      updateFullActivitiesTable();
+    });
+  }
+
+  // Date filter input
+  const dateInput = document.getElementById("activityDateFilterInput");
+  if (dateInput) {
+    dateInput.addEventListener("change", (e) => {
+      activeActivityDate = e.target.value || "";
+      updateFullActivitiesTable();
+    });
+  }
+
+  // Reset button
+  const resetBtn = document.getElementById("btnResetActivityFilters");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", resetActivityFilters);
+  }
 }
 
 // ==========================================================================
@@ -2087,6 +2254,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Setup forms & first render
   setupActivityForm();
+  setupActivityTableFilters();
   setupGoalProgressModal();
   setupCreateGoalModal();
   setupChallengeProgressModal();

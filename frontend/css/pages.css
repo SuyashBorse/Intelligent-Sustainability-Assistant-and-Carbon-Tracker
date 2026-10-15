@@ -524,6 +524,108 @@
   box-shadow: 0 0 0 2px var(--primary-focus);
 }
 
+/* ==========================================================================
+   Activity History Filter & Search Toolbar
+   ========================================================================== */
+.activity-filter-toolbar {
+  padding: 1rem 1.25rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.activity-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.activity-filter-summary {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.activity-filter-summary strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.activity-search-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.activity-search-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+
+.activity-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.activity-search-input {
+  width: 100%;
+  padding: 0.45rem 0.85rem 0.45rem 2.2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-main);
+  font-size: 0.86rem;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.activity-search-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-focus);
+  outline: none;
+}
+
+.activity-date-input {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-main);
+  font-size: 0.86rem;
+  min-width: 145px;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.activity-date-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-focus);
+  outline: none;
+}
+
+[data-theme="dark"] .activity-filter-toolbar {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .activity-search-input,
+[data-theme="dark"] .activity-date-input {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-main);
+}
+
 
 /* ==========================================================================
    Analytics Page

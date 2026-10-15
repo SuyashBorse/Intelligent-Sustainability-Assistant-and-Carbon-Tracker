@@ -474,7 +474,52 @@
               <button class="btn btn-primary btn-sm btn-open-log-modal">+ Log New Activity</button>
             </div>
 
-            <div class="table-responsive" style="margin-top: 1.5rem;">
+            <!-- Interactive Activity Filter & Search Toolbar -->
+            <div class="activity-filter-toolbar">
+              <div class="activity-filter-row">
+                <div class="goal-filter-pills" id="activityCategoryFilterGroup" style="margin-bottom: 0;">
+                  <button type="button" class="goal-filter-btn active" data-act-category="all">
+                    All (<span id="countActCatAll">0</span>)
+                  </button>
+                  <button type="button" class="goal-filter-btn" data-act-category="transportation">
+                    🚗 Transport (<span id="countActCatTransport">0</span>)
+                  </button>
+                  <button type="button" class="goal-filter-btn" data-act-category="energy">
+                    ⚡ Energy (<span id="countActCatEnergy">0</span>)
+                  </button>
+                  <button type="button" class="goal-filter-btn" data-act-category="food">
+                    🥗 Food (<span id="countActCatFood">0</span>)
+                  </button>
+                  <button type="button" class="goal-filter-btn" data-act-category="water">
+                    💧 Water (<span id="countActCatWater">0</span>)
+                  </button>
+                  <button type="button" class="goal-filter-btn" data-act-category="shopping">
+                    🛍️ Shopping (<span id="countActCatShopping">0</span>)
+                  </button>
+                </div>
+
+                <div id="activityFilterSummary" class="activity-filter-summary">
+                  Showing <strong id="activitiesFilteredCount">0</strong> of <span id="activitiesTotalCount">0</span> entries
+                </div>
+              </div>
+
+              <div class="activity-search-group">
+                <div class="activity-search-input-wrap">
+                  <svg class="activity-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  <input type="text" id="activitySearchInput" class="activity-search-input" placeholder="Search by activity name (e.g. car, flight, meal, electricity)..." aria-label="Search activity history" />
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <input type="date" id="activityDateFilterInput" class="activity-date-input" title="Filter by date" aria-label="Filter by date" />
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnResetActivityFilters">
+                    Reset Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive" style="margin-top: 1.25rem;">
               <table class="data-table">
                 <thead>
                   <tr>
