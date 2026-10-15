@@ -155,7 +155,7 @@ dashboard.html
 ├── View 3: Analytics & Trends (7D/30D/90D/1Y filters, Polar Area chart, top contributors)
 ├── View 4: Goals & Challenges (Active reduction targets, habit challenges, claim bounties)
 ├── View 5: AI Sustainability Coach (Gemini prompt cards, priority pills, actionable advice)
-└── View 6: Profile & Preferences (User units, reduction target, data export, account reset)
+└── View 6: Profile & Preferences (User units, reduction target, account reset)
 ```
 
 ---
@@ -375,3 +375,4 @@ The Gemini integration strictly enforces a structured JSON response schema:
 2. **Hardware IoT Telemetry:** No direct OBD-II vehicle hardware or smart electric meter API integrations (activities are user-logged).
 3. **Medical or Financial Advice:** AI recommendations strictly offer practical daily sustainability suggestions without medical or financial warranties.
 4. **Native Mobile Builds:** Application is architected as a responsive progressive web platform; native iOS/Android binary packages are out of scope.
+5. **External Data Exports:** File-based data exports (CSV, JSON, or PDF exports of activity records) are explicitly excluded from scope in favor of unified real-time dashboard analytics.
