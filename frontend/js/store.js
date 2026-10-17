@@ -6,6 +6,17 @@
 
 import { calculateEmission } from "./calculator.js";
 
+// Ensure safe storage fallback in all runtime environments (browsers, Node test runner, CI)
+if (typeof globalThis.localStorage === "undefined") {
+  globalThis.localStorage = {
+    _data: {},
+    getItem(k) { return this._data[k] ?? null; },
+    setItem(k, v) { this._data[k] = String(v); },
+    removeItem(k) { delete this._data[k]; },
+    clear() { this._data = {}; }
+  };
+}
+
 const STORAGE_KEY = "carbon_tracker_state_v1";
 const ACTIVE_EMAIL_KEY = "ecotrack_active_email";
 const REGISTRY_KEY = "ecotrack_accounts_registry";
