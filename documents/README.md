@@ -22,10 +22,15 @@ Comprehensive engineering and product documentation package for **EcoTrack — I
 
 ---
 
+> **🌐 Live Production Deployment:** [https://ecotrack-app-peach.vercel.app/](https://ecotrack-app-peach.vercel.app/)
+
+---
+
 ## 🛠️ Technology Stack
 
 - **Frontend:** Vanilla JavaScript (ES6+ Native Modules), HTML5 Semantic Layout, CSS3 Custom Properties (Design Tokens), Chart.js 4.4, Canvas Confetti
 - **Tooling & Bundler:** Vite 5.4
+- **Production Hosting:** Vercel Global Edge Network (Continuous Deployment from GitHub)
 - **Backend & Database:** Supabase PostgreSQL 17 with Row Level Security (RLS)
 - **Serverless AI Gateway:** Supabase Edge Functions (Deno runtime)
 - **AI Engine:** Google Gemini API (Structured JSON generation)

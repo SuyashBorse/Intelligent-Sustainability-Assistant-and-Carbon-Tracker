@@ -2,8 +2,9 @@
 
 **Product Name:** EcoTrack — Intelligent Sustainability Assistant & Carbon Tracker  
 **Repository:** `Intelligent Sustainability Assistant and Carbon Tracker`  
+**Live Production URL:** [https://ecotrack-app-peach.vercel.app/](https://ecotrack-app-peach.vercel.app/)  
 **Version:** 1.0.0 (Production Release)  
-**Status:** Implemented & Verified  
+**Status:** Implemented, Verified & Live in Production  
 **Date:** October 2026  
 **Primary Tech Stack:** Vanilla JavaScript (ES6+ Modules), HTML5, CSS3 Custom Design Tokens, Vite 5.4, Chart.js 4.4, Supabase (PostgreSQL 17 & Edge Functions), Google Gemini API  
 
@@ -151,7 +152,7 @@ The core operational cockpit provides a responsive sidebar navigation shell host
 dashboard.html
 ├── Header & Sidebar Shell (Collapsible Nav, Theme Toggle, User Avatar & Streak Pill)
 ├── View 1: Dashboard Overview (KPI stat pills, weekly trend, category doughnut, quick-logger)
-├── View 2: Activities History (Full filterable activity log, category badges, delete modal)
+├── View 2: Activities History (Full filterable activity log, category pills, keyword search, date picker, delete modal)
 ├── View 3: Analytics & Trends (7D/30D/90D/1Y filters, Polar Area chart, top contributors)
 ├── View 4: Goals & Challenges (Active reduction targets, habit challenges, claim bounties)
 ├── View 5: AI Sustainability Coach (Gemini prompt cards, priority pills, actionable advice)
@@ -366,6 +367,8 @@ The Gemini integration strictly enforces a structured JSON response schema:
 | **Gemini AI Coaching** | Prompt output strictly satisfies structured JSON schema with priority, savings, and difficulty attributes. | Verified |
 | **Multi-Account Isolation**| Switching between `kalpesh@demo.com` and newly registered accounts maintains completely isolated states. | Verified |
 | **Theme Persistence** | Dark/Light mode preference persists across reloads without visual flash (FOUC). | Verified |
+| **Activity Filtering & Search** | Category pills, keyword search, and single-day date picker dynamically filter emission history. | Verified |
+| **Production Deployment** | Multi-page static SPA deployed on Vercel with automated GitHub CI/CD and Supabase OAuth. | Verified |
 
 ---
 

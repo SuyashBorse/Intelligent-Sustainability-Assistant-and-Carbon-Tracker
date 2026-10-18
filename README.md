@@ -2,10 +2,14 @@
 
 An intelligent, full-featured personal carbon footprint tracking web application with interactive greenhouse gas (GHG) emission calculators, dynamic Chart.js analytics, real-time gamification streaks, and Google Gemini AI sustainability coaching.
 
+[![Live Web App](https://img.shields.io/badge/live_deployment-ecotrack--app--peach.vercel.app-059669?style=for-the-badge&logo=vercel)](https://ecotrack-app-peach.vercel.app/)
+[![CI & Quality Assurance](https://github.com/SuyashBorse/Intelligent-Sustainability-Assistant-and-Carbon-Tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/SuyashBorse/Intelligent-Sustainability-Assistant-and-Carbon-Tracker/actions)
 [![Vite](https://img.shields.io/badge/bundler-Vite_5.4-646CFF.svg)](https://vitejs.dev/)
-[![Supabase](https://img.shields.io/badge/backend-Supabase_PostgreSQL-3ECF8E.svg)](https://supabase.com/)
+[![Supabase](https://img.shields.io/badge/backend-Supabase_PostgreSQL_17-3ECF8E.svg)](https://supabase.com/)
 [![Chart.js](https://img.shields.io/badge/visualizations-Chart.js_4.4-FF6384.svg)](https://www.chartjs.org/)
 [![Google Gemini](https://img.shields.io/badge/AI-Google_Gemini-4285F4.svg)](https://deepmind.google/technologies/gemini/)
+
+> **🌐 Live Production Application:** [https://ecotrack-app-peach.vercel.app/](https://ecotrack-app-peach.vercel.app/)
 
 ---
 
@@ -15,6 +19,10 @@ An intelligent, full-featured personal carbon footprint tracking web application
   - Accurately tracks emissions across **Transportation** (petrol/diesel car, EV, metro, bus, domestic/international flights), **Energy** (electricity, natural gas, LPG), **Food** (beef, chicken, dairy, plant-based meals), **Water**, and **Shopping & Waste**.
   - Built strictly upon validated **IPCC** and **GHG Protocol** emission factor coefficients.
 
+- **🔍 Filterable Activity History & Search:**
+  - Dynamic category filter pills (`All`, `🚗 Transport`, `⚡ Energy`, `🥗 Food`, `💧 Water`, `🛍️ Shopping`) with live counts.
+  - Real-time keyword search across activity descriptions and single-day date picker filtering with 1-click reset.
+
 - **📊 Dynamic Analytics & Visualizations:**
   - Interactive multi-period trend analytics (7 days, 30 days, 90 days, 1 year).
   - High-resolution **Chart.js** visualizations including Doughnut category breakdowns, custom Polar Area distribution charts, and horizontal stacked progress charts for active goals and challenges.
@@ -23,7 +31,7 @@ An intelligent, full-featured personal carbon footprint tracking web application
 - **🤖 Gemini AI Sustainability Coach:**
   - Generates personalized, non-judgmental, and practical decarbonization recommendations based on summarized user activity payloads.
   - Enforces strict structured JSON schema output with category priorities, difficulty tiers, and estimated monthly $\text{kg CO}_2\text{e}$ savings.
-  - Architected to run securely through Supabase Edge Functions with zero API key leakage to client browsers.
+  - Protected via **zero-activity token guard** (0 API calls when accounts have 0 activities) and serverless Supabase Edge Functions with zero browser key leakage.
 
 - **🏆 Gamification & Habit Building Engine:**
   - **Strict Streak Engine:** Recalculates consecutive logging days dynamically from historical activity timestamps enforcing the 24-hour activity window.
@@ -31,8 +39,8 @@ An intelligent, full-featured personal carbon footprint tracking web application
   - **Achievements & Badges:** Unlock badges with interactive HTML5 canvas confetti celebrations.
 
 - **🔄 Hybrid Local & Cloud Persistence:**
-  - Works instantly out of the box with an isolated, multi-account client-side storage engine.
-  - Full **Supabase PostgreSQL** schema and RLS (Row Level Security) policies with an optimistic UI synchronization layer (`supabaseSync.js`) and authentication flows (`auth.js`).
+  - Works instantly out of the box with an isolated, multi-account client-side storage engine and 1-click rich demo (`kalpesh@demo.com`).
+  - Full **Supabase PostgreSQL 17** schema and RLS (Row Level Security) policies with an optimistic UI synchronization layer (`supabaseSync.js`) and authentication flows (`auth.js` with Google OAuth).
 
 - **📱 100% Mobile Responsive Design:**
   - Mobile-first CSS design tokens with adaptive sidebar, scalable stat pills, accessible modals, and touch-optimized action drawers.
@@ -139,6 +147,14 @@ npm run build
 # Preview production build locally
 npm run preview
 ```
+
+### 6. Live Production Deployment (Vercel)
+The project is deployed on Vercel with automatic continuous deployment from GitHub:
+- **Live URL:** [https://ecotrack-app-peach.vercel.app/](https://ecotrack-app-peach.vercel.app/)
+- **Framework Preset:** Vite
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Environment Variables:** `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
 
 ---
 
